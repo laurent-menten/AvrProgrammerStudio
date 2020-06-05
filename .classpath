@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-12">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src-tmp"/>
+	<classpathentry kind="src" path="src-ui"/>
+	<classpathentry kind="src" path="src-imported"/>
+	<classpathentry kind="src" path="src-demo"/>
+	<classpathentry kind="src" path="src-rsyntax"/>
+	<classpathentry exported="true" kind="lib" path="lib/rhino-1.7.12.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/F:/git/AvrProgrammerStudio/AvrProgrammerStudio/lib/rhino-1.7.12.zip!/rhino1.7.12/docs"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="lib/swingx-all-1.6.6-20181203.100000-1.jar" sourcepath="lib/swingx-all-1.6.6-20181203.100000-1-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/F:/git/AvrProgrammerStudio/AvrProgrammerStudio/lib/swingx-all-1.6.6-20181203.100000-1-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/MyFoundations"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

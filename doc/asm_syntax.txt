@@ -1,0 +1,49 @@
+
+Prepocressor
+	handle	.equ .set .unset (no reference to labels)
+	handle	.if .ifdef .ifndef .else .elif .endif
+	handle	.macro .endmacro .endm
+
+	--> generate temporary file
+
+
+
+
+// ============================================================================
+
+
+
+
+
+Number:
+	binary		sign?	0b		digits
+	oct			sign?	0		digits
+	dec			sign?	!0		digits
+	hex			sign?	0x | $	digits
+
+// ----------------------------------------------------------------------------
+// *** get address of a register
+
+// idea: 
+//	if IN/OUT/CBI/SBI/SBIC/SBIS
+//		returns 0..3F 
+//	else
+//		return 20 ..
+
+ADDRESS register
+
+// ----------------------------------------------------------------------------
+// *** get index of bit in register
+
+INDEX register.bit
+INDEX bit RELATIVE TO register
+
+// ----------------------------------------------------------------------------
+// *** get mask of bit/bits in register
+
+MASK register.bit
+MASK bit RELATIVE TO register
+
+MASK register [ bit, bit ... ]
+MASK [ bit, bit ... ] RELATIVE TO register
+

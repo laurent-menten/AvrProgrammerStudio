@@ -1,0 +1,1608 @@
+// = ======================================================================== =
+// = === AVR Programmer Studio ======= Copyright (c) 2020+ Laurent Menten === =
+// = ======================================================================== =
+// = = This program is free software: you can redistribute it and/or modify = =
+// = = it under the terms of the GNU General Public License as published by = =
+// = = the Free Software Foundation, either version 3 of the License, or    = =
+// = = (at your option) any later version.                                  = =
+// = =                                                                      = =
+// = = This program is distributed in the hope that it will be useful, but  = =
+// = = WITHOUT ANY WARRANTY; without even the implied warranty of           = =
+// = = MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU    = =
+// = = General Public License for more details.                             = =
+// = =                                                                      = =
+// = = You should have received a copy of the GNU General Public License    = =
+// = = along with this program. If not, see                                 = =
+// = = <https://www.gnu.org/licenses/>.                                     = =
+// = ======================================================================== =
+
+Package be.lmenten.avr.assembler.parser;
+
+// ============================================================================
+// ===	LANGUAGE ELEMENTS ======================================================	
+// ============================================================================
+
+Helpers
+
+	// ------------------------------------------------------------------------
+	// --- For case insensitive keywords --------------------------------------
+	// ------------------------------------------------------------------------
+
+	a =	['a' + 'A'];		j =	['j' + 'J'];		s =	['s' + 'S'];
+	b =	['b' + 'B'];		k =	['k' + 'K'];		t =	['t' + 'T'];
+	c =	['c' + 'C'];		l =	['l' + 'L'];		u =	['u' + 'U'];
+	d =	['d' + 'D'];		m =	['m' + 'M'];		v =	['v' + 'V'];
+	e =	['e' + 'E'];		n =	['n' + 'N'];		w =	['w' + 'W'];
+	f =	['f' + 'F'];		o =	['o' + 'O'];		x =	['x' + 'X'];
+	g =	['g' + 'G'];		p =	['p' + 'P'];		y =	['y' + 'Y'];
+	h =	['h' + 'H'];		q =	['q' + 'Q'];		z =	['z' + 'Z'];	
+	i =	['i' + 'I'];		r =	['r' + 'R'];
+
+	// ------------------------------------------------------------------------
+	// --- Identifiers --------------------------------------------------------
+	// ------------------------------------------------------------------------
+
+	letter				=	['A' .. 'Z'] | ['a' .. 'z'];
+	digit				=	['0' .. '9'];
+
+	id_start			=	letter | '_'		;
+	id_rest				=	letter | '_' | '$' | digit;
+	
+	// ------------------------------------------------------------------------
+	// --- Numbers ------------------------------------------------------------
+	// ------------------------------------------------------------------------
+
+	sign				=	('+' | '-');
+
+	bin_prefix			=	'0' ('b' | 'B');
+	bin_digit			=	['0' .. '1'];
+	bin_integer			=	sign? bin_prefix bin_digit+ ('_' bin_digit+)*;
+
+	oct_prefix			=	'0';
+	oct_digit			=	['0' .. '7'];
+	oct_integer			=	sign? oct_prefix oct_digit+ ('_' oct_digit+)*;
+
+	dec_prefix			=	['1' .. '9'];
+	dec_digit			=	['0' .. '9'];
+	dec_integer			=	sign? dec_prefix dec_digit* ('_' dec_digit+)*;
+
+	hex_prefix			=	('0' ('x' | 'X')) | '$';
+	hex_digit			=	['0' .. '9'] | ['a' .. 'f'] | ['A' .. 'F'];
+	hex_integer			=	sign? hex_prefix hex_digit+ ('_' hex_digit+)*;
+
+	// ------------------------------------------------------------------------
+	// --- Miscellaneous ------------------------------------------------------
+	// ------------------------------------------------------------------------
+
+	postinc				=	'+';
+	predec				=	'-';
+
+	tab					=	9;
+	space				=	32;
+	blank				=	space | tab;
+
+	lf					=	10;
+	cr					=	13;
+	eol					=	cr | lf | cr lf;
+
+
+	// ------------------------------------------------------------------------
+	// --- Comments -----------------------------------------------------------
+	// ------------------------------------------------------------------------
+
+	all_chars			=	[0 .. 0xFFFF];
+	all_but_eol			=	[all_chars - [cr + lf]];
+	all_but_star		=	[all_chars - '*'];
+	all_but_star_slash	=	[all_chars - ['*' + '/']];
+
+	short_comment		=	('//' | ';') all_but_eol* eol;
+
+    long_comment		=	('/*' | '/**') all_but_star* '*'+ (all_but_star_slash all_but_star* '*'+ )* '/';
+
+    comment				=	short_comment
+						|	long_comment;
+
+// ============================================================================
+// ===	LANGUAGE TOKENS ========================================================
+// ============================================================================
+
+Tokens
+
+	// ------------------------------------------------------------------------
+	// --- Registers ----------------------------------------------------------
+	// ------------------------------------------------------------------------
+
+	register
+		=	r '0'  | r '1'  | r '2'  | r '3'
+		|	r '4'  | r '5'  | r '6'  | r '7'
+		|	r '8'  | r '9'  | r '10' | r '11'
+		|	r '12' | r '13' | r '14' | r '15'
+		|	r '16' | r '17' | r '18' | r '19'
+		|	r '20' | r '21' | r '22' | r '23'
+		|	r '24' | r '25' | r '26' | r '27'
+		|	r '28' | r '29' | r '30' | r '31'
+		;
+
+	register_pair
+		=	r '0' ':' r '1'   | r '2' ':' r '3'
+		|	r '4' ':' r '5'   | r '6' ':' r '7'
+		|	r '8' ':' r '9'   | r '10' ':' r '11'
+		|	r '12' ':' r '13' | r '14' ':' r '15'
+		|	r '16' ':' r '17' | r '18' ':' r '19'
+		|	r '20' ':' r '21' | r '22' ':' r '23'
+		|	r '24' ':' r '25' | r '26' ':' r '27'
+		|	r '28' ':' r '29' | r '30' ':' r '31'
+		;
+
+	// ------------------------------------------------------------------------
+
+	reg_x				=	x;
+	reg_x_postinc		=	x postinc;
+	reg_x_predec		=	predec x;
+
+	reg_y				=	y;
+	reg_y_postinc		=	y postinc;
+	reg_y_predec		=	predec y;
+
+	reg_z				=	z;
+	reg_z_postinc		=	z postinc;
+	reg_z_predec		=	predec z;
+
+	// ------------------------------------------------------------------------ 
+	// --- Menmonics ----------------------------------------------------------
+	// ------------------------------------------------------------------------ 
+
+	m_adc				=	a d c ;
+	m_add				=	a d d ;
+	m_adiw				=	a d i w ;
+	m_and				=	a n d ;
+	m_andi				=	a n d i ;
+	m_asr				=	a s r ;
+	m_bclr				=	b c l r ;
+	m_bld				=	b l d ;
+	m_brbc				=	b r b c ;
+	m_brbs				=	b r b s ;
+	m_break				=	b r e a k ;
+	m_breq				=	b r e q ;
+	m_brge				=	b r g e ;
+	m_brhc				=	b r h c ;
+	m_brhs				=	b r h s ;
+	m_brid				=	b r i d ;
+	m_brie				=	b r i e ;
+	m_brlo				=	b r l o ;
+	m_brlt				=	b r l t ;
+	m_brmi				=	b r m i ;
+	m_brne				=	b r n e ;
+	m_brpl				=	b r p l ;
+	m_brsh				=	b r s h ;
+	m_brtc				=	b r t c ;
+	m_brts				=	b r t s ;
+	m_brvc				=	b r v c ;
+	m_brvs				=	b r v s ;
+	m_bset				=	b s e t ;
+	m_bst				=	b s t ;
+	m_call				=	c a l l ;
+	m_cbi				=	c b i ;
+	m_cbr				=	c b r ;
+	m_clc				=	c l c ;
+	m_clh				=	c l h ;
+	m_cli				=	c l i ;
+	m_cln				=	c l n ;
+	m_clr				=	c l r ;
+	m_cls				=	c l s ;
+	m_clt				=	c l t ;
+	m_clv				=	c l v ;
+	m_clz				=	c l z ;
+	m_com				=	c o m ;
+	m_cp				=	c p ;
+	m_cpc				=	c p c ;
+	m_cpi				=	c p i ;
+	m_cpse				=	c p s e ;
+	m_dec				=	d e c ;
+	m_des				=	d e s ;
+	m_eicall			=	e i c a l l ;
+	m_eijmp				=	e i j m p ;
+	m_elpm				=	e l p m ;
+	m_eor				=	e o r ;
+	m_fmul				=	f m u l ;
+	m_fmuls				=	f m u l s ;
+	m_fmulsu			=	f m u l s u ;
+	m_icall				=	i c a l l ;
+	m_ijmp				=	i j m p ;
+	m_in				=	i n ;
+	m_inc				=	i n c ;
+	m_jmp				=	j m p ;
+	m_lac				=	l a c ;
+	m_las				=	l a s ;
+	m_lat				=	l a t ;
+	m_ld				=	l d ;
+	m_ldd				=	l d d ;
+	m_ldi				=	l d i ;
+	m_lds				=	l d s ;
+	m_lpm				=	l p m ;
+	m_lsl				=	l s l ;
+	m_lsr				=	l s r ;
+	m_mov				=	m o v ;
+	m_movw				=	m o v w ;
+	m_mul				=	m u l ;
+	m_muls				=	m u l s ;
+	m_mulsu				=	m u l s u ;
+	m_neg				=	n e g ;
+	m_nop				=	n o p ;
+	m_or				=	o r ;
+	m_ori				=	o r i ;
+	m_out				=	o u t ;
+	m_pop				=	p o p ;
+	m_push				=	p u s h ;
+	m_rcall				=	r c a  l l ;
+	m_ret				=	r e t ;
+	m_reti				=	r e t i ;
+	m_rjmp				=	r j m p ;
+	m_rol				=	r o l ;
+	m_ror				=	r o r ;
+	m_sbc				=	s b c ;
+	m_sbci				=	s b c i ;
+	m_sbi				=	s b i ;
+	m_sbic				=	s b i c ;
+	m_sbis				=	s b i s ;
+	m_sbiw				=	s b i w ;
+	m_sbr				=	s b r ;
+	m_sbrc				=	s b r c ;
+	m_sbrs				=	s b r s ;
+	m_sec				=	s e c ;
+	m_seh				=	s e h ;
+	m_sei				=	s e i ;
+	m_sen				=	s e n ;
+	m_ser				=	s e r ;
+	m_ses				=	s e s ;
+	m_set				=	s e t ;
+	m_sev				=	s e v ;
+	m_sez				=	s e z ;
+	m_sleep				=	s l e e p ;
+	m_spm				=	s p m ;
+	m_st				=	s t ;
+	m_std				=	s t d ;
+	m_sts				=	s t s ;
+	m_sub				=	s u b ;
+	m_subi				=	s u b i ;
+	m_swap				=	s w a p ;
+	m_tst				=	t s t ;
+	m_wdr				=	w d r ;
+	m_xch				=	x c h ;
+
+	// ------------------------------------------------------------------------ 
+	// --- Keywords -----------------------------------------------------------
+	// ------------------------------------------------------------------------ 
+
+	prolog				=	'.' p r o l o g ;
+	endprolog			=	'.' e n d p r o l o g ;
+
+	org					=	'.' o r g ;
+
+	cseg				=	'.' c s e g ;
+	csegsize			=	'.' c s e g s i z e ;
+	dseg				=	'.' d s e g ;
+	eseg				=	'.' e s e g ;
+	
+	overlap				=	'.' o v e r l a p ;
+	nooverlap			=	'.' n o o v e r l a p ;
+
+	equ					=	'.' e q u ;
+	set					=	'.' s e t ;
+	unset				=	'.' u n s e t ;
+
+	def					=	'.' d e f ;
+	undef				=	'.' u n d e f ;
+
+	if					=	'.' i f ;
+	ifdef				=	'.' i f d e f ;
+	ifnef				=	'.' i f n d e f ;
+	elif				=	'.' e l i f ;
+	else				=	'.' e l s e ;
+	endif				=	'.' e n d i f ;
+
+	macro				=	'.' m a c r o ;
+	endm				=	'.' e n d m ;
+	endmacro			=	'.' e n d m a c r o ;
+
+	include				=	'.' i n c l u d e ;
+	list				=	'.' l i s t ;
+	listmac				=	'.' l i s t m a c ;
+	nolist				=	'.' n o l i s t ;
+
+	error				=	'.' e r r o r ;
+	warning				=	'.' w a r n i n g ;
+	message				=	'.' m e s s a g e ;
+	exit				=	'.' e x i t ;
+
+	// ------------------------------------------------------------------------
+
+	byte				=	'.' b y t e ;		// dseg eseg
+
+	db					=	'.' d b ;			// cseg eseg
+	dw					=	'.' d w ;			// cseg eseg
+	dd					=	'.' d d ;			// cseg eseg
+	dq					=	'.' d q ;			// cseg eseg
+
+
+	// ------------------------------------------------------------------------
+
+	address				=	a d d r e s s ;
+	ioaddress			=	i o a d d r e s s ;
+	index				=	i n d e x ;
+	mask				=	m a s k ;
+	offset				=	o f f s e t ;
+	relative			=	r e l a t i v e ;
+	to					=	t o ;
+
+	low					=	l o w ;
+	high				=	h i g h ;
+	page				=	p a g e ;
+	lwrd				=	l w r d ;
+	hwrd				=	h w r d ;
+	byte2				=	b y t e '2' ;
+	byte3				=	b y t e '3' ;
+	byte4				=	b y t e '4' ;
+
+	q7					=	q '7' ;
+	q15					=	q '15' ;
+	int					=	i n t ;
+	frac				=	f r a c ;
+
+	abs					=	a b s ;
+	exp2				=	e x p '2' ;
+	log2				=	l o g '2' ;
+
+	// ------------------------------------------------------------------------
+
+	//defined			=	d e f i n e d ;
+	//strlen			=	s t r l e n ;
+
+	// ------------------------------------------------------------------------ 
+	// --- Identifiers --------------------------------------------------------
+	// ------------------------------------------------------------------------ 
+
+	identifier			=	id_start id_rest* ;
+	
+	label				=	id_start id_rest* ':'
+						|	'.' id_start id_rest* ':'
+						;
+
+	here				=	'$' ;
+
+	// ------------------------------------------------------------------------ 
+	// --- Numbers ------------------------------------------------------------
+	// ------------------------------------------------------------------------ 
+
+	integer				=	bin_integer
+						|	oct_integer
+						|	dec_integer
+						|	hex_integer
+						;
+
+	decimal				=	'0' '.' dec_digit+
+						|	dec_prefix dec_digit* '.' dec_digit+
+						;
+
+	// ------------------------------------------------------------------------ 
+	// --- Operators ----------------------------------------------------------
+	// ------------------------------------------------------------------------ 
+
+	add					=	'+' ;
+	sub					=	'-' ;
+	mul					=	'*' ;
+	div					=	'/' ;
+	mod					=	'%' ;
+
+	not					=	'~' ;
+	and					=	'&' ;
+	or					=	'|' ;
+	xor					=	'^' ;
+	lshift				=	'<<' ;
+	rshift				=	'>>' ;
+
+	negate				=	'!' ;
+	equal				=	'==';
+	not_equal			=	'!=' ;
+	lower				=	'<' ;
+	lower_equal			=	'<=' ;
+	greater				=	'>' ;
+	greater_equal		=	'>=' ;
+
+	assign				=	'=' ;
+
+	// ------------------------------------------------------------------------ 
+	// --- Miscellaneous ------------------------------------------------------
+	// ------------------------------------------------------------------------ 
+
+	l_par				=	'(' ;
+	r_par				=	')' ;
+
+	l_bra				=	'[' ;
+	r_bra				=	']' ;
+
+	dot					=	'.' ;
+	colon				=	':' ;
+	comma				=	',' ;
+
+	eol					=	eol+ ;
+	blanks				=	blank* ;
+
+	comment				=	comment;
+
+// ============================================================================
+// ===	* ======================================================================
+// ============================================================================
+
+Ignored Tokens
+	eol,
+	comment,
+	blanks;
+
+// ============================================================================
+// ===	GRAMMAR ================================================================
+// ============================================================================
+
+Productions
+
+	program = line* ;
+
+	line { -> line? }
+
+		=	{label}		[label]:label
+						{
+							-> New line.label( label )
+						}
+
+		// --------------------------------------------------------------------
+
+		|	{code}	 	[instruction]:instruction
+						{
+							-> New line.code( instruction )
+						}
+/*
+		|	{db}		db [list]:data_list
+						{
+							-> New line.db( [list.expr] )
+						}
+
+
+		|	{dw}		dw [list]:data_list
+						{
+							-> New line.dw( [list.expr] )
+						}
+
+
+		|	{dd}		db [list]:data_list
+						{
+							-> New line.dd( [list.expr] )
+						}
+
+
+		|	{dq}		db [list]:data_list
+						{
+							-> New line.dq( [list.expr] )
+						}
+
+		|	{reserve}	rs [size]:expr
+						{
+							-> New line.reserve( size )
+						}
+*/
+
+		// --------------------------------------------------------------------
+
+		|	{prolog}	[keyword]:prolog
+						{
+							-> New line.prolog( keyword )
+						}
+
+		|	{endprolog}	[keyword]:endprolog
+						{
+							-> New line.endprolog( keyword )
+						}
+
+
+		// --------------------------------------------------------------------
+
+		|	{set}		set [name]:identifier assign [value]:expr
+						{
+							-> New line.set( name, value.expr )
+						}
+
+		|	{unset}		unset [name]:identifier
+						{
+							-> New line.unset( name )
+						}
+
+		|	{equ}		equ [name]:identifier assign [value]:expr
+						{
+							-> New line.equ( name, value.expr )
+						}
+
+		// --------------------------------------------------------------------
+
+		|	{org}		org [value]:expr
+						{
+							-> New line.org( value.expr )
+						}
+
+		|	{cseg}		cseg
+						{
+							-> New line.cseg()
+						}
+
+		|	{dseg}		dseg
+						{
+							-> New line.dseg()
+						}
+
+		|	{eseg}		eseg
+						{
+							-> New line.eseg()
+						}
+		;
+
+	// ------------------------------------------------------------------------
+	// ---
+	// ------------------------------------------------------------------------
+
+	instruction { -> instruction }
+
+		=	{i_adc}			m_adc [dest]:register comma [src]:register
+							{
+								-> New instruction.adc( dest, src )
+							}
+
+		|	{i_add}			m_add [dest]:register comma [src]:register
+							{
+								-> New instruction.adc( dest, src )
+							}
+
+		|	{i_adiw}		m_adiw [dest]:register_pair comma [k]:expr
+							{
+								-> New instruction.adiw( dest, k )
+							}
+
+		|	{i_and}			m_and [dest]:register comma [src]:register
+							{
+								-> New instruction.and( dest, src )
+							}
+
+		|	{i_andi}		m_andi [dest]:register comma [k]:expr
+							{
+								-> New instruction.andi( dest, k )
+							}
+
+		|	{i_asr}			m_asr [dest]:register
+							{
+								-> New instruction.asr( dest )
+							}
+
+		|	{i_bclr}		m_bclr [s]:expr
+							{
+								-> New instruction.bclr( s )
+							}
+
+		|	{i_bld}			m_bld [dest]:register comma [b]:expr
+							{
+								-> New instruction.bld( dest, b )
+							}
+
+		|	{i_brbc}		m_brbc [k]:expr comma [s]:expr
+							{
+								-> New instruction.brbc( k, s )
+							}
+
+		|	{i_brbs}		m_brbs [k]:expr comma [s]:expr
+							{
+								-> New instruction.brbs( k, s )
+							}
+
+		|	{i_break}		m_break
+							{
+								-> New instruction.break()
+							}
+
+		|	{i_breq}		m_breq [k]:expr
+							{
+								-> New instruction.breq( k )
+							}
+
+		|	{i_brge}		m_brge [k]:expr
+							{
+								-> New instruction.brge( k )
+							}
+
+		|	{i_brhc}		m_brhc [k]:expr
+							{
+								-> New instruction.brhc( k )
+							}
+
+		|	{i_brhs}		m_brhs [k]:expr
+							{
+								-> New instruction.brhs( k )
+							}
+
+		|	{i_brid}		m_brid [k]:expr
+							{
+								-> New instruction.brid( k )
+							}
+
+		|	{i_brie}		m_brie [k]:expr
+							{
+								-> New instruction.brie( k )
+							}
+
+		|	{i_brlo}		m_brlo [k]:expr
+							{
+								-> New instruction.brlo( k )
+							}
+
+		|	{i_brlt}		m_brlt [k]:expr
+							{
+								-> New instruction.brlt( k )
+							}
+
+		|	{i_brmi}		m_brmi [k]:expr
+							{
+								-> New instruction.brmi( k )
+							}
+
+		|	{i_brne}		m_brne [k]:expr
+							{
+								-> New instruction.brne( k )
+							}
+
+		|	{i_brpl}		m_brpl [k]:expr
+							{
+								-> New instruction.brpl( k )
+							}
+
+		|	{i_brsh}		m_brsh [k]:expr
+							{
+								-> New instruction.brsh( k )
+							}
+
+		|	{i_brtc}		m_brtc [k]:expr
+							{
+								-> New instruction.brtc( k )
+							}
+
+		|	{i_brts}		m_brts [k]:expr
+							{
+								-> New instruction.brts( k )
+							}
+
+		|	{i_brvc}		m_brvc [k]:expr
+							{
+								-> New instruction.brvc( k )
+							}
+
+		|	{i_brvs}		m_brvs [k]:expr
+							{
+								-> New instruction.brvs( k )
+							}
+
+		|	{i_bset}		m_bset [s]:expr
+							{
+								-> New instruction.bset( s )
+							}
+
+		|	{i_bst}			m_bst [dest]:register comma [b]:expr
+							{
+								-> New instruction.bst( dest, b )
+							}
+
+		|	{i_call}		m_call [k]:expr
+							{
+								-> New instruction.call( k )
+							}
+
+		|	{i_cbi}			m_cbi [a]: expr comma [b]:expr
+							{
+								-> New instruction.cbi( a, b )
+							}
+
+		|	{i_cbr}			m_cbr [dest]:register comma [k]:expr
+							{
+								-> New instruction.cbr( dest, k )
+							}
+
+		|	{i_clc}			m_clc
+							{
+								-> New instruction.clc()
+							}
+
+		|	{i_clh}			m_clh
+							{
+								-> New instruction.clh()
+							}
+
+		|	{i_cli}			m_cli
+							{
+								-> New instruction.cli()
+							}
+
+		|	{i_cln}			m_cln
+							{
+								-> New instruction.cln()
+							}
+
+		|	{i_clr}			m_clr [dest]:register
+							{
+								-> New instruction.clr( dest )
+							}
+
+		|	{i_cls}			m_cls
+							{
+								-> New instruction.cls()
+							}
+
+		|	{i_clt}			m_clt
+							{
+								-> New instruction.clt()
+							}
+
+		|	{i_clv}			m_clv
+							{
+								-> New instruction.clv()
+							}
+
+		|	{i_clz}			m_clz
+							{
+								-> New instruction.clz()
+							}
+
+		|	{i_com}			m_com [dest]:register
+							{
+								-> New instruction.com( dest )
+							}
+
+		|	{i_cp}			m_cp [dest]:register comma [src]:register
+							{
+								-> New instruction.cp( dest, src )
+							}
+
+		|	{i_cpc}			m_cpc [dest]:register comma [src]:register
+							{
+								-> New instruction.cpc( dest, src )
+							}
+
+		|	{i_cpi}			m_cpi [dest]:register comma [k]:expr
+							{
+								-> New instruction.cpi( dest, k )
+							}
+
+		|	{i_cpse}		m_cpse [dest]:register comma [src]:register
+							{
+								-> New instruction.cpse( dest, src )
+							}
+
+		|	{i_dec}			m_dec [dest]:register
+							{
+								-> New instruction.dec( dest )
+							}
+
+		|	{i_des}			m_des [k]:expr
+							{
+								-> New instruction.des( k )
+							}
+
+		|	{i_eicall}		m_eicall
+							{
+								-> New instruction.eicall()
+							}
+
+		|	{i_eijmp}		m_eijmp
+							{
+								-> New instruction.eijmp()
+							}
+
+//		|	{i_elpm}		m_elpm
+
+		|	{i_eor}			m_eor [dest]:register comma [src]:register
+							{
+								-> New instruction.eor( dest, src )
+							}
+
+		|	{i_fmul}		m_fmul [dest]:register comma [src]:register
+							{
+								-> New instruction.fmul( dest, src )
+							}
+
+		|	{i_fmuls}		m_fmuls [dest]:register comma [src]:register
+							{
+								-> New instruction.fmuls( dest, src )
+							}
+
+		|	{i_fmulsu}		m_fmulsu [dest]:register comma [src]:register
+							{
+								-> New instruction.fmulsu( dest, src )
+							}
+
+		|	{i_icall}		m_icall
+							{
+								-> New instruction.icall()
+							}
+
+		|	{i_ijmp}		m_ijmp
+							{
+								-> New instruction.ijmp()
+							}
+
+		|	{i_in}			m_in  [dest]:register comma [a]:expr
+							{
+								-> New instruction.in( dest, a )
+							}
+
+		|	{i_inc}			m_inc [dest]:register
+							{
+								-> New instruction.inc( dest )
+							}
+
+		|	{i_jmp}			m_jmp [k]:expr
+							{
+								-> New instruction.jmp( k )
+							}
+
+		|	{i_lac}			m_lac [dest]:register
+							{
+								-> New instruction.lac( dest )
+							}
+
+		|	{i_las}			m_las [dest]:register
+							{
+								-> New instruction.las( dest )
+							}
+
+		|	{i_lat}			m_lat [dest]:register
+							{
+								-> New instruction.lat( dest )
+							}
+
+
+//		|	{i_ld}			m_ld
+//		|	{i_ldd}			m_ldd
+
+		|	{i_ldi}			m_ldi [dest]:register comma [k]:expr
+							{
+								-> New instruction.ldi( dest, k )
+							}
+
+
+//		|	{i_lds}			m_lds
+//		|	{i_lpm}			m_lpm
+
+		|	{i_lsl}			m_lsl [dest]:register
+							{
+								-> New instruction.lsl( dest )
+							}
+
+		|	{i_lsr}			m_lsr [dest]:register
+							{
+								-> New instruction.lsr( dest )
+							}
+
+		|	{i_mov}			m_mov [dest]:register comma [src]:register
+							{
+								-> New instruction.mov( dest, src )
+							}
+
+		|	{i_movw}		m_movw [dest]:register_pair comma [src]:register_pair
+							{
+								-> New instruction.movw( dest, src )
+							}
+
+		|	{i_mul}			m_mul [dest]:register comma [src]:register
+							{
+								-> New instruction.mul( dest, src )
+							}
+
+		|	{i_muls}		m_muls [dest]:register comma [src]:register
+							{
+								-> New instruction.muls( dest, src )
+							}
+
+		|	{i_mulsu}		m_mulsu [dest]:register comma [src]:register
+							{
+								-> New instruction.mulsu( dest, src)
+							}
+
+		|	{i_neg}			m_neg [dest]:register
+							{
+								-> New instruction.neg( dest )
+							}
+
+		|	{i_nop}			m_nop
+							{
+								-> New instruction.nop()
+							}
+
+		|	{i_or}			m_or [dest]:register comma [src]:register
+							{
+								-> New instruction.or( dest, src )
+							}
+
+		|	{i_ori}			m_ori [dest]:register comma [k]:expr
+							{
+								-> New instruction.ori( dest, k )
+							}
+
+		|	{i_out}			m_out [a]:expr comma [src]:register
+							{
+								-> New instruction.out( a, src )
+							}
+
+		|	{i_pop}			m_pop [dest]:register
+							{
+								-> New instruction.pop( dest )
+							}
+
+		|	{i_push}		m_push [src]:register
+							{
+								-> New instruction.push( src )
+							}
+
+		|	{i_rcall}		m_rcall [k]:expr
+							{
+								-> New instruction.rcall( k )
+							}
+
+		|	{i_ret}			m_ret
+							{
+								-> New instruction.ret()
+							}
+
+		|	{i_reti}		m_reti
+							{
+								-> New instruction.reti()
+							}
+
+		|	{i_rjmp}		m_rjmp [k]:expr
+							{
+								-> New instruction.rjmp( k )
+							}
+
+		|	{i_rol}			m_rol [dest]:register
+							{
+								-> New instruction.rol( dest )
+							}
+
+		|	{i_ror}			m_ror [dest]:register
+							{
+								-> New instruction.ror( dest )
+							}
+
+		|	{i_sbc}			m_sbc [dest]:register comma [src]:register
+							{
+								-> New instruction.sbc( dest, src )
+							}
+
+		|	{i_sbci}		m_sbci [dest]:register comma [k]:expr
+							{
+								-> New instruction.sbci( dest, k )
+							}
+
+		|	{i_sbi}			m_sbi [a]:expr comma [b]:expr
+							{
+								-> New instruction.sbi( a, b )
+							}
+
+		|	{i_sbic}		m_sbic [a]:expr comma [b]:expr
+							{
+								-> New instruction.sbic( a, b )
+							}
+
+		|	{i_sbis}		m_sbis [a]:expr comma [b]:expr 
+							{
+								-> New instruction.sbis( a, b )
+							}
+
+		|	{i_sbiw}		m_sbiw [dest]:register_pair comma [k]:expr
+							{
+								-> New instruction.sbiw( dest, k )
+							}
+
+		|	{i_sbr}			m_sbr [dest]:register comma [k]:expr
+							{
+								-> New instruction.sbr( dest, k )
+							}
+
+		|	{i_sbrc}		m_sbrc [dest]:register comma [b]:expr
+							{
+								-> New instruction.sbrc( dest, b )
+							}
+
+		|	{i_sbrs}		m_sbrs [dest]:register comma [b]:expr
+							{
+								-> New instruction.sbrs( dest, b )
+							}
+
+
+		|	{i_sec}			m_sec
+							{
+								-> New instruction.sec()
+							}
+
+		|	{i_seh}			m_seh
+							{
+								-> New instruction.seh()
+							}
+
+		|	{i_sei}			m_sei
+							{
+								-> New instruction.sei()
+							}
+
+		|	{i_sen}			m_sen
+							{
+								-> New instruction.sen()
+							}
+
+		|	{i_ser}			m_ser [dest]:register
+							{
+								-> New instruction.ser( dest )
+							}
+
+		|	{i_ses}			m_ses
+							{
+								-> New instruction.ses()
+							}
+
+		|	{i_set}			m_set
+							{
+								-> New instruction.set()
+							}
+
+		|	{i_sev}			m_sev
+							{
+								-> New instruction.sev()
+							}
+
+		|	{i_sez}			m_sez
+							{
+								-> New instruction.sez()
+							}
+
+		|	{i_sleep}		m_sleep
+							{
+								-> New instruction.sleep()
+							}
+
+//		|	{i_spm}
+//		|	{i_st}
+//		|	{i_std}
+//		|	{i_sts}
+
+		|	{i_sub}			m_sub [dest]:register comma [src]:register
+							{
+								-> New instruction.sub( dest, src )
+							}
+
+		|	{i_subi}		m_subi [dest]:register comma [k]:expr
+							{
+								-> New instruction.subi( dest, k )
+							}
+
+		|	{i_swap}		m_swap [dest]:register
+							{
+								-> New instruction.swap( dest )
+							}
+
+		|	{i_tst}			m_tst [dest]:register comma [src]:register
+							{
+								-> New instruction.tst( dest, src )
+							}
+
+		|	{i_wdr}			m_wdr
+							{
+								-> New instruction.wdr()
+							}
+
+		|	{i_xch}			m_xch reg_z comma [src]:register
+							{
+								-> New instruction.xch( src )
+							}
+		;
+
+	// ------------------------------------------------------------------------
+
+	data_list { -> expr* }
+		=	{single}	[datum]:expr
+						{
+							-> [datum]
+						}
+
+		|	{multiple}	[datum]:expr comma [rest]:data_list
+						{
+							-> [datum, rest.expr]
+						}
+		;
+
+	// ------------------------------------------------------------------------
+	// --- Expersion ----------------------------------------------------------
+	// ------------------------------------------------------------------------
+
+	expr { -> expr }
+
+		=	{add}		[left]:expr add [right]:factor
+						{
+							-> New expr.add( left.expr, right.expr )
+						}
+
+		|	{sub}		[left]:expr sub [right]:factor
+						{
+							-> New expr.sub( left.expr, right.expr )
+						}
+
+		// --------------------------------------------------------------------
+
+		|	{and}		[left]:expr and [right]:factor
+						{
+							-> New expr.and( left.expr, right.expr )
+						}
+
+		// --------------------------------------------------------------------
+
+		|	{factor}	factor
+						{
+							-> factor.expr
+						}
+		;
+
+	// ------------------------------------------------------------------------
+	// ---
+	// ------------------------------------------------------------------------
+
+	factor { -> expr }
+
+		=	{mul}		[left]:factor mul [right]:value
+						{
+							-> New expr.mul( left.expr, right.expr )
+						}
+
+
+		|	{div}		[left]:factor div [right]:value
+						{
+							-> New expr.div( left.expr, right.expr )
+						}
+
+		|	{mod}		[left]:factor mod [right]:value
+						{
+							-> New expr.mod( left.expr, right.expr )
+						}
+
+		// --------------------------------------------------------------------
+
+		|	{or}		[left]:factor or [right]:value
+						{
+							-> New expr.or( left.expr, right.expr )
+						}
+
+		|	{xor}		[left]:factor xor [right]:value
+						{
+							-> New expr.xor( left.expr, right.expr )
+						}
+
+		|	{lshift}	[left]:factor lshift [right]:value
+						{
+							-> New expr.lshift( left.expr, right.expr )
+						}
+
+		|	{rshift}	[left]:factor rshift [right]:value
+						{
+							-> New expr.rshift( left.expr, right.expr )
+						}
+
+		// --------------------------------------------------------------------
+
+		|	{value}		value
+						{
+							-> value.expr
+						}
+		;
+
+	// ------------------------------------------------------------------------
+	// ---
+	// ------------------------------------------------------------------------
+
+	value { -> expr }
+
+		=	{parens}	l_par expr r_par
+						{
+							-> expr.expr
+						}
+
+		|	{not}		not l_par expr r_par
+						{
+							-> New expr.not( expr.expr )
+						}
+
+		|	{integer}	integer
+						{
+							-> New expr.integer( integer )
+						}
+
+		|	{decimal}	decimal
+						{
+							-> New expr.decimal( decimal )
+						}
+
+		|	{constant}	[name]:identifier
+						{
+							-> New expr.constant( name )
+						}
+
+		|	{here}		here
+						{
+							-> New expr.here()
+						}
+
+		// --------------------------------------------------------------------
+
+		|	{address}	address [register]:identifier
+						{
+							-> New expr.address( register )
+						}
+
+
+		|	{ioaddress}	ioaddress [register]:identifier
+						{
+							-> New expr.ioaddress( register )
+						}
+
+		|	{index}		index [register]:identifier dot [bit]:identifier
+						{
+							-> New expr.index( register, bit )
+						}
+
+		|	{index_r}	index [bit]:identifier relative to [register]:identifier 
+						{
+							-> New expr.index( register, bit )
+						}
+
+		|	{mask}		mask [register]:identifier dot [bit]:identifier
+						{
+							-> New expr.mask( register, [bit] )
+						}
+
+		|	{mask_r}	mask [bit]:identifier relative to [register]:identifier
+						{
+							-> New expr.mask( register, [bit] )
+						}
+
+		|	{mask_l}	mask [register]:identifier l_bra [bits]:bit_list r_bra
+						{
+							-> New expr.mask( register, [bits.identifier] )
+						}
+
+		|	{mask_rl}	mask l_bra [bits]:bit_list r_bra relative to [register]:identifier 
+						{
+							-> New expr.mask( register, [bits.identifier] )
+						}
+
+		|	{offset}	offset [struct]:identifier dot [member]:identifier
+						{
+							-> New expr.offset( struct, member )
+						}
+
+		|	{offset_r}	offset [member]:identifier relative to [struct]:identifier
+						{
+							-> New expr.offset( struct, member )
+						}
+
+		// --------------------------------------------------------------------
+
+		|	{low}		low l_par [arg]:expr r_par
+						{
+							-> New expr.low( arg )
+						}
+
+		|	{high}		high l_par [arg]:expr r_par
+						{
+							-> New expr.high( arg )
+						}
+
+		|	{byte2}		byte2 l_par [arg]:expr r_par
+						{
+							-> New expr.high( arg )
+						}
+
+		|	{page}		page l_par [arg]:expr r_par
+						{
+							-> New expr.page( arg )
+						}
+
+		|	{byte3}		byte3 l_par [arg]:expr r_par
+						{
+							-> New expr.byte3( arg )
+						}
+
+		|	{byte4}		byte4 l_par [arg]:expr r_par
+						{
+							-> New expr.byte4( arg )
+						}
+
+		// --------------------------------------------------------------------
+
+		|	{lwrd}		lwrd l_par [arg]:expr r_par
+						{
+							-> New expr.lwrd( arg )
+						}
+
+		|	{hwrd}		hwrd l_par [arg]:expr r_par
+						{
+							-> New expr.hwrd( arg )
+						}
+
+		// --------------------------------------------------------------------
+
+		|	{q7}		q7 l_par [arg]:expr r_par
+						{
+							-> New expr.q7( arg )
+						}
+
+		|	{q15}		q15 l_par [arg]:expr r_par
+						{
+							-> New expr.q15( arg )
+						}
+
+		|	{int}		int l_par [arg]:expr r_par
+						{
+							-> New expr.int( arg )
+						}
+
+		|	{frac}		frac l_par [arg]:expr r_par
+						{
+							-> New expr.frac( arg )
+						}
+
+		// --------------------------------------------------------------------
+
+		|	{abs}		abs l_par [arg]:expr r_par
+						{
+							-> New expr.abs( arg )
+						}
+
+		|	{exp2}		exp2 l_par [arg]:expr r_par
+						{
+							-> New expr.exp2( arg )
+						}
+
+		|	{log2}		log2 l_par [arg]:expr r_par
+						{
+							-> New expr.log2( arg )
+						}
+
+		;
+
+	// ------------------------------------------------------------------------
+
+	bit_list { -> identifier* }
+		=	{single}	[bit]:identifier
+						{
+							-> [bit]
+						}
+
+		|	{multiple}	[bit]:identifier comma [rest]:bit_list
+						{
+							-> [bit, rest.identifier]
+						}
+		;
+
+// ============================================================================
+// ===	AST ====================================================================
+// ============================================================================
+
+Abstract Syntax Tree
+
+	program
+		=				line*
+  		;
+
+	// ------------------------------------------------------------------------
+	// --- Single line --------------------------------------------------------
+	// ------------------------------------------------------------------------
+
+	line
+
+		=	{empty}
+		|	{label}		[name]:label
+		|	{code}		[instruction]:instruction
+
+		|	{db}		[data]:expr*
+		|	{dw}		[data]:expr*
+		|	{dd}		[data]:expr*
+		|	{dq}		[data]:expr*
+
+		|	{reserve}	[size]:expr
+
+		|	{set}		[name]:identifier [value]:expr
+		|	{unset}		[name]:identifier
+		|	{equ}		[name]:identifier [value]:expr
+
+		|	{org}		[value]:expr
+		|	{cseg}
+		|	{dseg}
+		|	{eseg}
+
+		|	{prolog}	[keyword]:prolog
+		|	{endprolog} [keyword]:endprolog
+		;
+
+	// ------------------------------------------------------------------------
+	// --- Instruction --------------------------------------------------------
+	// ------------------------------------------------------------------------
+
+	instruction
+
+		=	{adc}		[dest]:register [src]:register
+		|	{add}		[dest]:register [src]:register
+		|	{adiw}		[dest]:register_pair [k]:expr
+		|	{and}		[dest]:register [src]:register
+		|	{andi}		[dest]:register [k]:expr
+		|	{asr}		[dest]:register
+		|	{bclr}		[s]:expr
+		|	{bld}		[dest]:register [b]:expr
+		|	{brbc}		[k]:expr [s]:expr
+		|	{brbs}		[k]:expr [s]:expr
+		|	{break}
+		|	{breq}		[k]:expr
+		|	{brge}		[k]:expr
+		|	{brhc}		[k]:expr
+		|	{brhs}		[k]:expr
+		|	{brid}		[k]:expr
+		|	{brie}		[k]:expr
+		|	{brlo}		[k]:expr
+		|	{brlt}		[k]:expr
+		|	{brmi}		[k]:expr
+		|	{brne}		[k]:expr
+		|	{brpl}		[k]:expr
+		|	{brsh}		[k]:expr
+		|	{brtc}		[k]:expr
+		|	{brts}		[k]:expr
+		|	{brvc}		[k]:expr
+		|	{brvs}		[k]:expr
+		|	{bset}		[s]:expr
+		|	{bst}		[dest]:register [b]:expr
+		|	{call}		[k]:expr
+		|	{cbi}		[a]: expr [b]:expr
+		|	{cbr}		[dest]:register [k]:expr
+		|	{clc}
+		|	{clh}
+		|	{cli}
+		|	{cln}
+		|	{clr}		[dest]:register
+		|	{cls}
+		|	{clt}
+		|	{clv}
+		|	{clz}
+		|	{com}		[dest]:register
+		|	{cp}		[dest]:register [src]:register
+		|	{cpc}		[dest]:register [src]:register
+		|	{cpi}		[dest]:register [k]:expr
+		|	{cpse}		[dest]:register [src]:register
+		|	{dec}		[dest]:register
+		|	{des}		[k]:expr
+		|	{eicall}
+		|	{eijmp}
+//		|	{elpm}
+		|	{eor}		[dest]:register [src]:register
+		|	{fmul}		[dest]:register [src]:register
+		|	{fmuls}		[dest]:register [src]:register
+		|	{fmulsu}	[dest]:register [src]:register
+		|	{icall}
+		|	{ijmp}
+		|	{in}		[dest]:register [a]:expr
+		|	{inc}		[dest]:register
+		|	{jmp}		[k]:expr
+		|	{lac}		[dest]:register
+		|	{las}		[dest]:register
+		|	{lat}		[dest]:register
+//		|	{ld}		
+//		|	{ldd}		
+		|	{ldi}		[dest]:register [k]:expr
+//		|	{lds}		
+//		|	{lp}		
+		|	{lsl}		[dest]:register
+		|	{lsr}		[dest]:register
+		|	{mov}		[dest]:register [src]:register
+		|	{movw}		[dest]:register_pair [src]:register_pair
+		|	{mul}		[dest]:register [src]:register
+		|	{muls}		[dest]:register [src]:register
+		|	{mulsu}		[dest]:register [src]:register
+		|	{neg}		[dest]:register
+		|	{nop}
+		|	{or}		[dest]:register [src]:register
+		|	{ori}		[dest]:register [k]:expr
+		|	{out}		[a]:expr [src]:register
+		|	{pop}		[dest]:register
+		|	{push}		[src]:register
+		|	{rcall}		[k]:expr
+		|	{ret}
+		|	{reti}
+		|	{rjmp}		[k]:expr
+		|	{rol}		[dest]:register
+		|	{ror}		[dest]:register
+		|	{sbc}		[dest]:register [src]:register
+		|	{sbci}		[dest]:register [k]:expr
+		|	{sbi}		[a]:expr [b]:expr
+		|	{sbic}		[a]:expr [b]:expr
+		|	{sbis}		[a]:expr [b]:expr 
+		|	{sbiw}		[dest]:register_pair [k]:expr
+		|	{sbr}		[dest]:register [k]:expr
+		|	{sbrc}		[dest]:register [b]:expr
+		|	{sbrs}		[dest]:register [b]:expr
+		|	{sec}
+		|	{seh}
+		|	{sei}
+		|	{sen}
+		|	{ser}		[dest]:register
+		|	{ses}
+		|	{set}
+		|	{sev}
+		|	{sez}
+		|	{sleep}
+//		|	{sp}
+//		|	{st}
+//		|	{std}
+//		|	{sts}
+		|	{sub}		[dest]:register [src]:register
+		|	{subi}		[dest]:register [k]:expr
+		|	{swap}		[dest]:register
+		|	{tst}		[dest]:register [src]:register
+		|	{wdr}
+		|	{xch}		[src]:register
+
+		;
+
+	// ------------------------------------------------------------------------
+	// --- Expression ---------------------------------------------------------
+	// ------------------------------------------------------------------------
+
+	expr
+
+		=	{add}		[left]:expr [right]:expr
+		|	{sub}		[left]:expr [right]:expr
+		|	{mul}		[left]:expr [right]:expr
+		|	{div}		[left]:expr [right]:expr
+		|	{mod}		[left]:expr [right]:expr
+
+		|	{not}		[arg]:expr
+
+		|	{and}		[left]:expr [right]:expr
+		|	{or}		[left]:expr [right]:expr
+		|	{xor}		[left]:expr [right]:expr
+		|	{lshift}	[left]:expr [right]:expr
+		|	{rshift}	[left]:expr [right]:expr
+
+		|	{integer}	integer
+		|	{decimal}	decimal
+		|	{constant}	[name]:identifier
+		|	{here}
+
+		|	{address}	[register]:identifier
+		|	{ioaddress}	[register]:identifier
+		|	{index}		[register]:identifier [bit]:identifier
+		|	{mask}		[register]:identifier [bits]:identifier*
+		|	{offset}	[struct]:identifier [member]:identifier
+
+		|	{low}		[arg]:expr
+		|	{high}		[arg]:expr	// also byte2
+		|	{page}		[arg]:expr
+		|	{byte3}		[arg]:expr
+		|	{byte4}		[arg]:expr
+		|	{lwrd}		[arg]:expr
+		|	{hwrd}		[arg]:expr
+
+		|	{q7}		[arg]:expr
+		|	{q15}		[arg]:expr
+		|	{int}		[arg]:expr
+		|	{frac}		[arg]:expr
+
+		|	{abs}		[arg]:expr
+		|	{exp2}		[arg]:expr
+		|	{log2}		[arg]:expr
+
+		;

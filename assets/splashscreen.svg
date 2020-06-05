@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:export-ydpi="96"
+   inkscape:export-xdpi="96"
+   inkscape:export-filename="F:\git\AvrProgrammerStudio\AvrProgrammerStudio\src-ui\be\lmenten\avr\splashscreen.png"
+   width="620"
+   height="300"
+   viewBox="0 0 164.04166 79.375002"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   sodipodi:docname="splashscreen.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     inkscape:guide-bbox="true"
+     showguides="true"
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.2039889"
+     inkscape:cx="451.97405"
+     inkscape:cy="123.67369"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer2"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="1072"
+     inkscape:window-maximized="1">
+    <sodipodi:guide
+       id="guide21"
+       orientation="0,-1"
+       position="5.1969455,5.1973955" />
+    <sodipodi:guide
+       id="guide32"
+       orientation="1,0"
+       position="5.2916663,74.083335" />
+    <sodipodi:guide
+       id="guide34"
+       orientation="0,-1"
+       position="5.2916661,74.083337" />
+    <sodipodi:guide
+       id="guide36"
+       orientation="0,-1"
+       position="47.624998,5.2916719" />
+    <sodipodi:guide
+       id="guide38"
+       orientation="1,0"
+       position="47.624996,5.2916721" />
+    <sodipodi:guide
+       id="guide40"
+       orientation="1,0"
+       position="52.916666,74.083335" />
+    <sodipodi:guide
+       id="guide42"
+       orientation="1,0"
+       position="158.75001,5.2916719" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     style="display:inline"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       y="0.1527525"
+       x="0.1527525"
+       height="79.069496"
+       width="163.73616"
+       id="rect869"
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.305505;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <rect
+       y="5.2916646"
+       x="52.916668"
+       height="68.791664"
+       width="105.83334"
+       id="rect27"
+       style="fill:#ffffff;stroke-width:0.406138" />
+    <rect
+       y="5.2916665"
+       x="5.2916665"
+       height="68.791664"
+       width="42.333332"
+       id="rect15"
+       style="fill:#0000ff;fill-rule:evenodd;stroke-width:0.260186" />
+    <rect
+       y="15.65661"
+       x="52.916679"
+       height="3.7599551e-15"
+       width="105.83334"
+       id="rect871"
+       style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.264583;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <text
+       id="text875"
+       y="22.944838"
+       x="85.306763"
+       style="font-style:normal;font-weight:normal;font-size:4.33878px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.10847"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.10847"
+         y="22.944838"
+         x="85.306763"
+         id="tspan873"
+         sodipodi:role="line">by Laurent Menten</tspan></text>
+  </g>
+  <g
+     inkscape:label="Layer 2"
+     id="layer2"
+     inkscape:groupmode="layer">
+    <text
+       id="text9"
+       y="12.001929"
+       x="52.847691"
+       style="font-style:normal;font-weight:normal;font-size:8.83202px;line-height:1.25;font-family:sans-serif;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.220802"
+       xml:space="preserve"><tspan
+         id="tspan11"
+         style="stroke-width:0.220802"
+         y="12.001929"
+         x="52.847691"
+         sodipodi:role="line">AVR Programmer Studio</tspan></text>
+  </g>
+</svg>
