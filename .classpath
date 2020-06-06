@@ -6,11 +6,10 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="src-tmp"/>
+	<classpathentry kind="src" path="src-tmp-tests"/>
 	<classpathentry kind="src" path="src-ui"/>
-	<classpathentry kind="src" path="src-imported"/>
-	<classpathentry kind="src" path="src-demo"/>
-	<classpathentry kind="src" path="src-rsyntax"/>
+	<classpathentry kind="src" path="src-jlfgr"/>
+	<classpathentry kind="src" path="src-json.simple"/>
 	<classpathentry exported="true" kind="lib" path="lib/rhino-1.7.12.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/F:/git/AvrProgrammerStudio/AvrProgrammerStudio/lib/rhino-1.7.12.zip!/rhino1.7.12/docs"/>
@@ -22,5 +21,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/MyFoundations"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/RSyntax"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
