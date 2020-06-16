@@ -11,7 +11,7 @@ public class CoreMemorySectionDescriptor
 	// ===
 	// ========================================================================
 
-	public CoreMemorySectionDescriptor( String name, int address, int size )
+	/*package*/ CoreMemorySectionDescriptor( String name, int address, int size )
 	{
 		this.name = name;
 		this.address = address;

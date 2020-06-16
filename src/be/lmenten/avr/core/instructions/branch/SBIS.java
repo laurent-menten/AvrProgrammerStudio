@@ -54,7 +54,7 @@ public class SBIS
 	@Override
 	public void execute( Core core )
 	{
-		CoreRegister r = core.getIORegister( getA() );
+		CoreRegister r = core.getIORegisterByAddress( getA() );
 
 		// --------------------------------------------------------------------
 

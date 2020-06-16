@@ -59,7 +59,7 @@ public interface CoreModel
 	// ========================================================================
 
 	public CoreRegister getGeneralRegister( AvrRegister reg );
-	public CoreRegister getIORegister( int address );
+	public CoreRegister getIORegisterByAddress( int address );
 	public CoreRegister getIORegisterByPhysicalAddress( int address );
 	public CoreRegister getRegisterByName( String name );
 

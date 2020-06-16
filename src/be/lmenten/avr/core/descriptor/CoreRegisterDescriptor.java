@@ -43,7 +43,7 @@ public class CoreRegisterDescriptor
 	// === CONSTRUCTOR(S) =====================================================
 	// ========================================================================
 
-	public CoreRegisterDescriptor( int address, String name )
+	/*package*/ CoreRegisterDescriptor( int address, String name )
 	{
 		this.hasAddress = true;
 		this.address = address;

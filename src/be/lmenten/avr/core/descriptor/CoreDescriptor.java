@@ -222,7 +222,7 @@ public class CoreDescriptor
 	// === CONSTRUCTOR(s) ======================================================
 	// =========================================================================
 
-	public CoreDescriptor( SupportedCore coreId )
+	/*package*/ CoreDescriptor( SupportedCore coreId )
 	{
 		res = coreId.getDescriptorResourceBundle();
 	
@@ -860,6 +860,14 @@ public class CoreDescriptor
 	public int getRegistersCount()
 	{
 		return registers.getRangeSize();
+	}
+
+	public void exportRegisters( BiConsumer<Integer,CoreRegisterDescriptor> c )
+	{
+		for( Map.Entry<Integer,CoreRegisterDescriptor> r : registersByAddress.entrySet() )
+		{
+			c.accept( r.getKey(), r.getValue() );
+		}
 	}
 
 	// ------------------------------------------------------------------------

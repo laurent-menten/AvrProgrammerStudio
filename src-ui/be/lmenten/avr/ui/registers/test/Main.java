@@ -14,7 +14,7 @@ public class Main {
 
 	public static void main( String[] args )
 	{
-		CoreDescriptor desc = new CoreDescriptor( SupportedCore.ATMEGA2560 );
+		CoreDescriptor desc = SupportedCore.ATMEGA2560.getDescriptor();
 		Core core = new Core( desc );
 	
 		// --------------------------------------------------------------------

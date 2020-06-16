@@ -57,7 +57,7 @@ public class IN
 	public void execute( Core core )
 	{
 		CoreRegister rd = core.getGeneralRegister( getRx() );
-		CoreRegister io = core.getIORegister( getA() );
+		CoreRegister io = core.getIORegisterByAddress( getA() );
 
 		rd.setData( io.getData() );
 

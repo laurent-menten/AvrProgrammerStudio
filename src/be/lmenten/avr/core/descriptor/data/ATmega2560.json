@@ -53,10 +53,10 @@
 		{ "name" : "E2END",				"value" : "EEPROMEND", "comment": "!!! alias !!!" },
 		{ "name" : "EEADRBITS",			"value" : "12" },
 
-		{ "name" : "NRWW_START_ADDR",	"value" : "0x1F000" },
-		{ "name" : "NRWW_STOP_ADDR",	"value" : "0x1FFFF" },
 		{ "name" : "RWW_START_ADDR",	"value" : "0x00000" },
 		{ "name" : "RWW_STOP_ADDR",	"value" : "0x1EFFF" },
+		{ "name" : "NRWW_START_ADDR",	"value" : "0x1F000" },
+		{ "name" : "NRWW_STOP_ADDR",	"value" : "0x1FFFF" },
 		{ "name" : "PAGESIZE",			"value" : "128" },
 
 		{ "name" : "FIRSTBOOTSTART",	"value" : "0x1FE00" },
@@ -74,7 +74,7 @@
 	],
 
 	"lock_bits" : [
-		{ "name" : "LOCKITS", "bits" : [ null, null, "BLB12", "BLB11", "BLB02", "BLB01", "LB2", "LB1" ], "mask": "0b0011_1111", "default" : "0b11111111" }
+		{ "name" : "LOCKBITS", "bits" : [ null, null, "BLB12", "BLB11", "BLB02", "BLB01", "LB2", "LB1" ], "mask": "0b0011_1111", "default" : "0b11111111" }
 	],
 
 	"interrupts" : [

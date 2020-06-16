@@ -65,9 +65,9 @@ public class AvrProgrammerStudio
 
 	// ------------------------------------------------------------------------
 
-	private final boolean hasSplashScreen;
-	private final SplashScreen splashScreen;
-	private final Graphics2D splashScreenGr;
+	private boolean hasSplashScreen;
+	private SplashScreen splashScreen;
+	private Graphics2D splashScreenGr;
 
 	// ========================================================================
 	// === CONSTRUCTOR(s) =====================================================
@@ -91,29 +91,6 @@ public class AvrProgrammerStudio
 			log.log( Level.WARNING, "Failed to save preferences", e  );
 		}
 
-		// --------------------------------------------------------------------
-		// - Splashscreen -----------------------------------------------------
-		// --------------------------------------------------------------------
-
-		splashScreen = SplashScreen.getSplashScreen();
-		if( splashScreen == null )
-		{
-			hasSplashScreen = false;
-			splashScreenGr = null;
-
-			log.warning( "Could not create splashscreen" );
-		}
-		else
-		{
-			hasSplashScreen = true;
-			splashScreenGr = splashScreen.createGraphics();
-		}
-
-		// --------------------------------------------------------------------
-		// - Install UI defaults ---------------------------------------------- 
-		// --------------------------------------------------------------------
-
-		CoreUIDefaults.installDefaults();
 	}
 
 	// ========================================================================
@@ -123,13 +100,42 @@ public class AvrProgrammerStudio
 	@Override
 	protected void initialize()
 	{
-		// --------------------------------------------------------------------
-		// - UI pre-configuration ---------------------------------------------
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
+		// - Splashscreen -------------------------------------------------------
+		// ----------------------------------------------------------------------
+
+		splashScreen = SplashScreen.getSplashScreen();
+		hasSplashScreen = (splashScreen != null);
+		if( ! hasSplashScreen )
+		{
+			log.warning( "Could not create splashscreen" );
+		}
+		else
+		{
+			splashScreenGr = splashScreen.createGraphics();
+		}
+
+		// ----------------------------------------------------------------------
+		// - UI pre-configuration -----------------------------------------------
+		// ----------------------------------------------------------------------
 
 		SwingUtils.setNimbusLookAndFeel();
 
-		logWindow.setVisible( true );
+		// ----------------------------------------------------------------------
+		// - Install UI defaults ------------------------------------------------
+		// ----------------------------------------------------------------------
+
+		CoreUIDefaults.installDefaults();
+
+		// ----------------------------------------------------------------------
+		// ----------------------------------------------------------------------
+
+		for( SupportedCore core : SupportedCore.values() )
+		{
+			splashScreenUpdate( core.getId() );;
+
+			core.getDescriptor();
+		}
 	}
 
 	@Override
@@ -172,7 +178,7 @@ public class AvrProgrammerStudio
 	@Override
 	protected void run()
 	{
-		CoreDescriptor cdesc = new CoreDescriptor( SupportedCore.ATMEGA2560 );
+		CoreDescriptor cdesc = SupportedCore.ATMEGA2560.getDescriptor();
 
 		Properties config = new Properties();
 		config.put( Core.CONFIG_EXTERNAL_SRAM, "16K" );
@@ -232,8 +238,6 @@ public class AvrProgrammerStudio
 				PrintStream fileOut = new PrintStream( "./self-text.txt" );
 				System.setOut( fileOut );
 			
-				dumpFlash( core );
-
 				out.println( " >>> Self test finished <<<" );
 			}
 			catch( IOException e )
@@ -249,8 +253,8 @@ public class AvrProgrammerStudio
 		{
 			try
 			{
-				core.loadProgram(  fc.getSelectedFile() );
-				core.loadProgram( new File( "./bootloader.ATmega2560.03E000.hex" ) );
+				core.loadFlash(  fc.getSelectedFile() );
+				core.loadFlash( new File( "./bootloader.ATmega2560.03E000.hex" ) );
 			}
 			catch( IOException e )
 			{
@@ -477,34 +481,6 @@ public class AvrProgrammerStudio
 				e.printStackTrace();
 			}
 		}
-	}
-
-	// ========================================================================
-	// ===
-	// ========================================================================
-
-	@SuppressWarnings("deprecation")
-	private void dumpFlash( Core core )
-	{
-		core.dumpFlash( mem ->
-		{
-			for( int addr = 0 ; addr < mem.length ; addr++ )
-			{
-				if( mem[addr] != null )
-				{
-					ParsedAssemblerLine parsedLine = new ParsedAssemblerLine();
-					parsedLine.setAddress( addr );
-					mem[addr].toParsedLine( core, parsedLine );
-
-					System.out.println( parsedLine );
-
-					if( mem[addr].getOpcodeSize() == 2 )
-					{
-						addr++;
-					}
-				}
-			}
-		} );
 	}
 
 	// ========================================================================

@@ -21,7 +21,7 @@ public class APSAsm {
 		// --------------------------------------------------------------------
 		try
 		{
-			CoreDescriptor cdesc = new CoreDescriptor( SupportedCore.ATMEGA2560 );
+			CoreDescriptor cdesc = SupportedCore.ATMEGA2560.getDescriptor();
 
 			AvrSource src = new AvrExternalSource( "test.asm", cdesc );
 

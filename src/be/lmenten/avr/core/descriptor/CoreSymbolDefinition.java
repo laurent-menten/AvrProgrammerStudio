@@ -18,7 +18,7 @@ public class CoreSymbolDefinition
 	// === CONSTRUCTOR(s) =====================================================
 	// ========================================================================
 
-	public CoreSymbolDefinition( JSONObject o )
+	/*protected*/ CoreSymbolDefinition( JSONObject o )
 	{
 		String tmp;
 

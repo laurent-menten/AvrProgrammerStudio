@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,19 +62,19 @@ public class Core
 	public static final String CONFIG_EXTERNAL_SRAM
 		= "external.sram.size";
 
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	private final CoreDescriptor cdesc;
 
-	// ------------------------------------------------------------------------
-	// - Memories -------------------------------------------------------------
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
+	// - Memories --------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	private final CoreRegister [] fuses;
 
 	private final CoreRegister [] lockBits;
 
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	private final Instruction [] flash;	
 	private final Map<Integer,String> flashSymbolsByAddresse
@@ -87,9 +88,9 @@ public class Core
 	private final Map<Integer,String> eepromSymbolsByAddresse
 		= new HashMap<>();
 
-	// ------------------------------------------------------------------------
-	// - Registers shortcuts --------------------------------------------------
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
+	// - Registers shortcuts ---------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	public final CoreStatusRegister SREG;
 	public final CoreRegister MCUSR;
@@ -98,7 +99,7 @@ public class Core
 	public final CoreRegister SPH;
 	public final CoreRegister SPL;
 
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	public final CoreRegister XMCRA;
 	public final CoreRegister XMCRB;
@@ -110,7 +111,7 @@ public class Core
 	public final CoreRegister PRR0;
 	public final CoreRegister PRR1;
 	
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	public final CoreRegister RAMPD;
 	public final CoreRegister RAMPX;
@@ -118,17 +119,19 @@ public class Core
 	public final CoreRegister RAMPZ;
 	public final CoreRegister EIND;
 
-	// ------------------------------------------------------------------------
-	// - Configuration --------------------------------------------------------
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
+	// - Configuration ---------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	private Level traceLevel = Level.FINE;
+
+	// -------------------------------------------------------------------------
 	
 	private int externalSramSize = 0;
 
-	// ------------------------------------------------------------------------
-	// - Runtime --------------------------------------------------------------
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
+	// - Runtime ---------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	private boolean ioDebugRegisterDirty = false;
 
@@ -140,16 +143,16 @@ public class Core
 
 	private RunningMode coreMode = RunningMode.STOPPED;
 
-	// ------------------------------------------------------------------------
-	// - Events ---------------------------------------------------------------
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
+	// - Events ----------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	private final List<CoreEventListener> coreEventListener
 		= new ArrayList<>();
 
-	// ========================================================================
-	// === CONSTRUCTOR(S) =====================================================
-	// ========================================================================
+	// =========================================================================
+	// === CONSTRUCTOR(S) ======================================================
+	// =========================================================================
 
 	/**
 	 * 
@@ -171,27 +174,24 @@ public class Core
 
 		log.info( "Core: " + cdesc.getPartName() );
 
-		StringBuilder s = new StringBuilder();
+		StringJoiner sj = new StringJoiner( ", " );
 		for( CoreFeatures feature : cdesc.getFeatures() )
 		{
-			s.append( feature )
-			 .append( ' ' )
-			 ;
+			sj.add( feature.toString() );
 		}
-		log.fine( " > features : " + s );
+		log.fine( " > features : " + sj );
 		
-
-		// --------------------------------------------------------------------
-		// - GENERAL CONFIGURATION --------------------------------------------
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
+		// - GENERAL CONFIGURATION ----------------------------------------------
+		// ----------------------------------------------------------------------
 
 		parseSystemConfig();
 
 		LogFormatter.setLevel( traceLevel );
 
-		// --------------------------------------------------------------------
-		// - FUSES / LOCKBITS -------------------------------------------------
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
+		// - FUSES / LOCKBITS ---------------------------------------------------
+		// ----------------------------------------------------------------------
 
 		log.fine( " > fuse bytes : " + cdesc.getFusesCount() );
 
@@ -202,7 +202,7 @@ public class Core
 			fuses[ addr ].setAddress( addr );
 		} );
 
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
 
 		log.fine( " > lockbits bytes : " + cdesc.getLockBitsCount() );
 
@@ -213,20 +213,19 @@ public class Core
 			lockBits[ addr ].setAddress( addr );
 		} );
 		
-		// --------------------------------------------------------------------
-		// - CORE RUNTIME CONFIGURATION ---------------------------------------
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
+		// - CORE RUNTIME CONFIGURATION -----------------------------------------
+		// ----------------------------------------------------------------------
 
 		parseConfig( config );
 
-		// --------------------------------------------------------------------
-		// - FLASH ------------------------------------------------------------
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
+		// - FLASH --------------------------------------------------------------
+		// ----------------------------------------------------------------------
 
 		log.info( "Flash size = " + cdesc.getFlashSize() + " bytes" );
 
 		flash = new Instruction [ cdesc.getFlashSize() / 2 ];
-
 		for( int addr = 0 ; addr < flash.length ; addr++ )
 		{
 			flash[ addr ] = null;
@@ -238,9 +237,9 @@ public class Core
 			log.fine( " > BLS size = " + getBootLoaderSectionSize() + " bytes" );
 		}
 
-		// --------------------------------------------------------------------
-		// - SRAM -------------------------------------------------------------
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
+		// - SRAM ---------------------------------------------------------------
+		// ----------------------------------------------------------------------
 
 		if( supportsExternalMemoryFeature() )
 		{
@@ -253,26 +252,26 @@ public class Core
 		}
 
 		sram = new CoreData [ cdesc.getOnChipSramSize() + externalSramSize ];
-
-		// - R0 .. Rxx --------------------------------------------------------
-
-		for( int i = 0 ; i < cdesc.getRegistersCount() ; i++ )
+		for( int addr = 0 ; addr < sram.length ; addr++ )
 		{
-			int addr = cdesc.getRegistersBase() + i;
-			String name = "R" + i;
-			CoreRegisterDescriptor rdesc = new CoreRegisterDescriptor( addr, name );
+			sram[ addr ] = null;
+		}
 
+		// - R0 .. Rxx ----------------------------------------------------------
+
+		cdesc.exportRegisters( ( addr, rdesc ) ->
+		{
 			CoreRegister reg = new CoreRegister( rdesc ); 
 			reg.setAddress( addr );
 
-			sram [ addr ] = reg;
-		}
+			sram[ addr ] = reg;			
+		} );
 		
 		log.fine( " > " + cdesc.getRegistersCount() + " general registers");
 		
-		// - I/O registers ----------------------------------------------------
+		// - I/O registers ------------------------------------------------------
 
-		cdesc.exportIoRegisters( (addr, rdesc ) ->
+		cdesc.exportIoRegisters( ( addr, rdesc ) ->
 		{
 			CoreRegister reg;
 	
@@ -288,9 +287,9 @@ public class Core
 
 		log.fine( " > " + cdesc.getIoRegistersCount() + " I/O registers");
 
-		// - Extended I/O registers -------------------------------------------
+		// - Extended I/O registers ---------------------------------------------
 
-		cdesc.exportExtendedIoRegisters( (addr, rdesc) ->
+		cdesc.exportExtendedIoRegisters( ( addr, rdesc ) ->
 		{
 			CoreRegister reg = new CoreRegister( rdesc ); 
 			reg.setAddress( addr );
@@ -300,7 +299,7 @@ public class Core
 
 		log.fine( " > " + cdesc.getExtendedIoRegistersCount() + " extended I/O registers");
 
-		// - Internal memory --------------------------------------------------
+		// - Internal memory ----------------------------------------------------
 
 		for( int addr = 0 ; addr < cdesc.getSramSize() ; addr++ )
 		{
@@ -310,7 +309,7 @@ public class Core
 			sram[ cdesc.getSramBase() + addr ] = data;
 		}
 
-		// - External (off-chip) memory ---------------------------------------
+		// - External (off-chip) memory -----------------------------------------
 
 		if( supportsExternalMemoryFeature() )
 		{
@@ -323,9 +322,9 @@ public class Core
 			}
 		}
 
-		// --------------------------------------------------------------------
-		// - EEPROM -----------------------------------------------------------
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
+		// - EEPROM -------------------------------------------------------------
+		// ----------------------------------------------------------------------
 
 		log.info( "Eeprom size = " + cdesc.getEepromSize() + " bytes" );
 
@@ -338,9 +337,9 @@ public class Core
 			eeprom[ addr ] = data;
 		}
 
-		// --------------------------------------------------------------------
-		// - Registers shortcuts ----------------------------------------------
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
+		// - Registers shortcuts ------------------------------------------------
+		// ----------------------------------------------------------------------
 
 		CoreRegisterDescriptor rdesc;
 
@@ -353,7 +352,7 @@ public class Core
 		rdesc = cdesc.getRegisterDescriptor( "MCUSR" );
 		MCUSR = (CoreRegister) sram[ rdesc.getAddress() ];
 
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
 
 		rdesc = cdesc.getRegisterDescriptor( "SPL" );
 		SPL = (CoreRegister) sram[ rdesc.getAddress() ];
@@ -368,7 +367,7 @@ public class Core
 
 		// TODO add CCP from Xmega architecture
 
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
 
 		rdesc = cdesc.getRegisterDescriptor( "OSCCAL" );
 		OSCCAL = (CoreRegister) sram[ rdesc.getAddress() ];
@@ -385,7 +384,7 @@ public class Core
 		rdesc = cdesc.getRegisterDescriptor( "PRR1" );
 		PRR1 = (rdesc != null) ? (CoreRegister) sram[ rdesc.getAddress() ] : null;
 
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
 
 		if( supportsExternalMemoryFeature() )
 		{
@@ -401,7 +400,7 @@ public class Core
 			XMCRB = null;
 		}
 
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
 
 		rdesc = cdesc.getRegisterDescriptor( "RAMPD" );
 		if( rdesc != null )
@@ -443,9 +442,9 @@ public class Core
 		else
 			EIND = null;
 
-		// --------------------------------------------------------------------
-		// - Finalisation -----------------------------------------------------
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
+		// - Finalisation -------------------------------------------------------
+		// ----------------------------------------------------------------------
 
 		reset( ResetSources.POWER_ON );
 	}
@@ -457,7 +456,7 @@ public class Core
 	{
 		String tmp;
 
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
 
 		tmp = System.getProperty( SYSTEM_CONFIG_TRACE_LEVEL );
 		if( tmp != null )
@@ -479,22 +478,42 @@ public class Core
 
 		String tmp;
 
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
 
-		tmp = config.getProperty( CONFIG_EXTERNAL_SRAM );
-		if( tmp != null )
+		if( supportsExternalMemoryFeature() )
 		{
-			externalSramSize = (int) StringUtils.parseNumber( tmp );
-			if( (externalSramSize < 0 || (externalSramSize) > cdesc.getMaxExternalSramSize()) )
+			tmp = config.getProperty( CONFIG_EXTERNAL_SRAM );
+			if( tmp != null )
 			{
-				System.out.println( "external sram size !!!" );
+				externalSramSize = (int) StringUtils.parseNumber( tmp );
+				if( (externalSramSize < 0)
+						|| (externalSramSize > cdesc.getMaxExternalSramSize()) )
+				{
+					System.out.println( "external sram size !!!" );
+				}
 			}
 		}
 	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public Properties getDefaultConfig()
+	{
+		Properties config = new Properties();
+
+		if( supportsExternalMemoryFeature() )
+		{
+			config.put( CONFIG_EXTERNAL_SRAM, 0 );
+		}
+
+		return config;
+	}
 	
-	// ========================================================================
-	// === DEBUG HELPERS ======================================================
-	// ========================================================================
+	// =========================================================================
+	// === DEBUG HELPERS =======================================================
+	// =========================================================================
 
 	public void ioDebugRegisterDirty( boolean ioDebugRegisterDirty )
 	{
@@ -506,41 +525,9 @@ public class Core
 		return ioDebugRegisterDirty;
 	}
 
-	// ------------------------------------------------------------------------
-
-	@Deprecated
-	public void dumpFlash( Consumer<Instruction []> dumper )
-	{
-		dumper.accept( flash );
-	}
-
-	@Deprecated
-	public void dumpSram( Consumer<CoreData []> dumper )
-	{
-		dumper.accept( sram );
-	}
-
-	@Deprecated
-	public void dumpEeprom( Consumer<CoreData []> dumper )
-	{
-		dumper.accept( eeprom );
-	}
-
-	@Deprecated
-	public void dumpFuses( Consumer<CoreRegister []> dumper )
-	{
-		dumper.accept( fuses );
-	}
-
-	@Deprecated
-	public void dumpLockBits( Consumer<CoreRegister []> dumper )
-	{
-		dumper.accept( lockBits );
-	}
-
-	// ========================================================================
-	// === Events =============================================================
-	// ========================================================================
+	// =========================================================================
+	// === Events ==============================================================
+	// =========================================================================
 
 	public void addCoreEventListener( CoreEventListener listener )
 	{
@@ -573,9 +560,9 @@ public class Core
 		}
 	}
 
-	// ========================================================================
-	// === Descriptor =========================================================
-	// ========================================================================
+	// =========================================================================
+	// === Descriptor ==========================================================
+	// =========================================================================
 
 	@Override
 	public CoreDescriptor getDescriptor()
@@ -583,7 +570,7 @@ public class Core
 		return cdesc;
 	}
 
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	@Override
 	public boolean supportsBootLoaderSection()
@@ -647,7 +634,7 @@ public class Core
 		throw new UnsupportedOperationException( "MCU has no bootloader support" );
 	}
 
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	@Override
 	public boolean supportsExternalMemoryFeature()
@@ -658,12 +645,17 @@ public class Core
 	@Override
 	public int getExternalSramSize()
 	{
-		return externalSramSize;
+		if( supportsExternalMemoryFeature() )
+		{
+			return externalSramSize;
+		}
+
+		throw new UnsupportedOperationException( "MCU has no external memory support" );
 	}
 
-	// ========================================================================
-	// === PROGRAM ============================================================
-	// ========================================================================
+	// =========================================================================
+	// === PROGRAM =============================================================
+	// =========================================================================
 
 	@Override
 	public int getProgramCounter()
@@ -681,7 +673,7 @@ public class Core
 		this.programCounter += offset ;
 	}
 
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	@Override
 	public Instruction getCurrentInstruction()
@@ -700,7 +692,23 @@ public class Core
 		return null;
 	}
 
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
+
+	public int getInterruptVectorAddress( int vector )
+	{
+		int address = 0x00000;
+		if( MCUCR.bit( "IVSEL" ) )
+		{
+			CoreRegister fuse = getFuseByte( "HIGH_BYTE" ) ;
+
+			int bootsz = fuse.mask( "BOOTSZ1", "BOOTSZ0" ) >> 1;
+			address = cdesc.getBootLoaderSection( bootsz ).getRangeBase();
+		}
+
+		return address + (vector * cdesc.getInterruptVectorSize());
+	}
+
+	// -------------------------------------------------------------------------
 
 	public void pushProgramCounter()
 	{
@@ -729,7 +737,9 @@ public class Core
 		programCounter = value;
 	}
 
-	// ------------------------------------------------------------------------
+	// =========================================================================
+	// === LOADER ==============================================================
+	// =========================================================================
 
 	/**
 	 * 
@@ -750,21 +760,24 @@ public class Core
 		}
 	}
 
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
+	@Deprecated
 	public void loadProgram( Consumer<Instruction []> loader )
 	{
 		loader.accept( flash );
 	}
 
-	public void loadProgram( File file )
+	// -------------------------------------------------------------------------
+
+	public void loadFlash( File file )
 		throws IOException
 	{
 		try( IntelHexReader r = new IntelHexReader( file ) )
 		{
 			while( ! r.eof() )
 			{
-				int address = (int)r.getAddress();
+				int address = (int) r.getAddress();
 				int opcode = r.readWord();
 
 				InstructionSet entry = InstructionSet.getInstructionSetEntry( opcode );
@@ -808,20 +821,26 @@ public class Core
 		}
 	}
 
-	// ------------------------------------------------------------------------
-
-	public int getInterruptVectorAddress( int vector )
+	/**
+	 * 
+	 * @param file
+	 */
+	public void loadEeprom( File file )
+		throws IOException
 	{
-		int address = 0x00000;
-		if( MCUCR.bit( "IVSEL" ) )
+		try( IntelHexReader r = new IntelHexReader( file ) )
 		{
-			CoreRegister fuse = getFuseByte( "HIGH_BYTE" ) ;
+			while( ! r.eof() )
+			{
+				int address = (int) r.getAddress();
+				int value = r.readByte();
 
-			int bootsz = fuse.mask( "BOOTSZ1", "BOOTSZ0" ) >> 1;
-			address = cdesc.getBootLoaderSection( bootsz ).getRangeBase();
+				CoreData data = new CoreData( (byte) value );
+				data.setAddress( address );
+
+				eeprom[address] = data;
+			}
 		}
-
-		return address + (vector * cdesc.getInterruptVectorSize());
 	}
 
 	// ========================================================================
@@ -1052,7 +1071,7 @@ public class Core
 	 * @param address
 	 * @return
 	 */
-	public CoreRegister getIORegister( int address )
+	public CoreRegister getIORegisterByAddress( int address )
 	{
 		if( (address < 0) || (address >= cdesc.getIoRegistersCount()) )
 		{
@@ -1080,7 +1099,7 @@ public class Core
 	}
 
 	/**
-	 * Get an I/O Register by its name.
+	 * Get a register by its name (General, IO or extended IO).
 	 * 
 	 * @param name
 	 * @return
@@ -1382,31 +1401,6 @@ public class Core
 		}
 
 		return null;
-	}
-
-	// ========================================================================
-	// === Object =============================================================
-	// ========================================================================
-
-	@Override
-	public String toString()
-	{
-		StringBuilder s = new StringBuilder();
-
-		for( int i = 0 ; i < cdesc.getSramBase() + 10 ; i++ )
-		{
-			if( sram[i] != null )
-			{
-				s.append( String.format( "%04x: %s", i, sram[i] ) );
-			}
-			else
-			{
-				s.append( String.format( "%04x: -", i ) );
-			}
-			s.append( '\n' );
-		}
-
-		return s.toString();
 	}
 
 	// ========================================================================

@@ -100,7 +100,7 @@ public abstract class AbstractInstruction_A5_b3
 
 		if( core != null )
 		{
-			CoreRegister rdesc = core.getIORegister( getA() );
+			CoreRegister rdesc = core.getIORegisterByAddress( getA() );
 			if( rdesc != null )
 			{
 				comment.append( "Address = " + address );

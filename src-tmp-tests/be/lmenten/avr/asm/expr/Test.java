@@ -14,7 +14,7 @@ public class Test
 	{
 		try
 		{
-			CoreDescriptor cdesc = new CoreDescriptor( SupportedCore.ATMEGA2560 );
+			CoreDescriptor cdesc = SupportedCore.ATMEGA2560.getDescriptor();
 			
 //			AvrSource src = new AvrInternalSource( "AVP_SOURCE_TEST.asm", cdesc );
 			AvrSource src = new AvrExternalSource( "test.asm", cdesc );

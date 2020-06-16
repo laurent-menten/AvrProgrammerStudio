@@ -47,7 +47,7 @@ public class CoreMemoryRange
 	// === CONSTRUCTOR(s) =====================================================
 	// ========================================================================
 
-	public CoreMemoryRange( CoreMemory memory, String name, JSONObject o )
+	/*package*/ CoreMemoryRange( CoreMemory memory, String name, JSONObject o )
 	{
 		String tmp;
 

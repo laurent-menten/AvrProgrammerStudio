@@ -21,7 +21,7 @@ public class CoreInterruptDescriptor
 	// === CONSTRUCTOR(S) =====================================================
 	// ========================================================================
 
-	public CoreInterruptDescriptor( JSONObject o )
+	/*package*/ CoreInterruptDescriptor( JSONObject o )
 	{
 		String tmp;
 

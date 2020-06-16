@@ -1013,6 +1013,7 @@ public enum InstructionSet
 	 * 
 	 * @param core
 	 */
+	@SuppressWarnings( "deprecation" )
 	public static void selfTest( Core core )
 	{
 		core.loadProgram( flash ->

@@ -1,41 +1,69 @@
 {
 	"file" : {
-		"version"				: "1.0.0",
+		"version"				: "1.0.1",
 		"date"					: "2020/05/24",
-		"author"				: "Laurent Menten <laurent.menten@gmail.com>",
-		"notes"					: ""
+		"author"					: "Laurent Menten <laurent.menten@gmail.com>",
+
+		"notes"					: "The simulator section should be implemented"
 	},
 
 	"core" : {
 		"name"					: "ATmega328",
 		"version"				: "V2E",
 		"signature"				: [ "0x1e", "0x95", "0x14" ],
-		"features"				: [ "BOOT_LOADER" ],
 
-		"flash"					: "32K",
+		"features"				: [
+			"BOOT_LOADER"
+		],
+
+		"flash"					: { "base" : "0x00000", "size" : "32K" },
 		"pc_width"				: "14",
 		"vector_size"			: "2",
-		
-		"rww"					: { "base" : "0x0000", "limit" : "0x37FF" },
-		"nrww"					: { "base" : "0x3800", "limit" : "0x3FFF" },
-		"page_size"				: "64",
-		"bootsz"				: [ "4K", "2K", "1K", "512" ],
 
-		"eeprom"				: "1K",
-		"eeaddr_width"			: "10",
+      "page_size"          : "64",
+		"rww"					   : { "base" : "0x00000", "limit" : "0x037FF" },
+		"nrww"					: { "base" : "0x03800", "limit" : "0x03FFF" },
 
-		"registers_base"		: "0x0000",
-		"registers"				: "32",
+      "bootsz"             : [
+         { "base" : "0x03800", "limit" : "0x03FFF", "comment" : "BOOTSZ[0..1]=00" },
+         { "base" : "0x03C00", "limit" : "0x03FFF", "comment" : "BOOTSZ[0..1]=01" },
+         { "base" : "0x03E00", "limit" : "0x03FFF", "comment" : "BOOTSZ[0..1]=10" },
+         { "base" : "0x03F00", "limit" : "0x03FFF", "comment" : "BOOTSZ[0..1]=11" }
+      ],
 
-		"io_base"				: "0x0020",
-		"io"					: "64",
+		"registers"				: { "base" : "0x0000", "size" : "32" },
+		"io"					   : { "base" : "0x0020", "size" : "64" },
+		"extended_io"			: { "base" : "0x0060", "size" : "160" },
+		"sram"					: { "base" : "0x0100", "size" : "2K" },
 
-		"extended_io_base"		: "0x0060",
-		"extended_io"			: "160",
-
-		"sram_base"				: "0x0100",
-		"sram"					: "2K"
+		"eeprom"				   : { "base" : "0x0000", "size" : "1K" },
+		"eeaddr_width"			: "10"
 	},
+
+	"symbols" : [
+		{ "name" : "FLASHEND",			"value" : "0x03FFF" },
+		{ "name" : "IOEND",				"value" : "0x00FF" },
+		{ "name" : "SRAM_START",		"value" : "0x0100" },
+		{ "name" : "SRAM_SIZE",			"value" : "2048" },
+		{ "name" : "RAMEND",			   "value" : "0x08FF" },
+		{ "name" : "EEPROMEND",			"value" : "0x03FF" },
+		{ "name" : "E2END",				"value" : "EEPROMEND", "comment": "!!! alias !!!" },
+		{ "name" : "EEADRBITS",			"value" : "10" },
+
+		{ "name" : "RWW_START_ADDR",	"value" : "0x00000" },
+		{ "name" : "RWW_STOP_ADDR",	"value" : "0x037FF" },
+		{ "name" : "NRWW_START_ADDR",	"value" : "0x03800" },
+		{ "name" : "NRWW_STOP_ADDR",	"value" : "0x03FFF" },
+		{ "name" : "PAGESIZE",			"value" : "128" },
+
+		{ "name" : "FIRSTBOOTSTART",	"value" : "0x03F00" },
+		{ "name" : "SECONDBOOTSTART",	"value" : "0x03E00" },
+		{ "name" : "THIRDBOOTSTART",	"value" : "0x03C00" },
+		{ "name" : "FOURTHBOOTSTART",	"value" : "0x03800" },		
+		{ "name" : "SMALLBOOTSTART",	"value" : "FIRSTBOOTSTART", "comment" : "!!! alias !!!" },
+		{ "name" : "LARGEBOOTSTART",	"value" : "FOURTHBOOTSTART", "comment" : "!!! alias !!!" }
+	],
+
 
 	"fuses" : [
 		{ "name" : "LOW_BYTE", "bits" : [ "CKDIV8", "CKOUT", "SUT1", "SUT0", "CKSEL3", "CKSEL2", "CKSEL1", "CKSEL0" ], "default" : "0b01100010" },
@@ -44,7 +72,7 @@
 	],
 
 	"lock_bits" : [
-		{ "name" : "Lock bit byte", "bits" : [ null, null, "BLB12", "BLB11", "BLB02", "BLB01", "LB2", "LB1" ], "mask": "0b0011_1111", "default" : "0b11_111111" }
+		{ "name" : "LOCKBITS", "bits" : [ null, null, "BLB12", "BLB11", "BLB02", "BLB01", "LB2", "LB1" ], "mask": "0b0011_1111", "default" : "0b11_111111" }
 	],
 
 	"interrupts" : [
@@ -79,15 +107,15 @@
 
 	"io_map" : [
 		{ "address" : "0x0023", "name": "PINB", "bits" : [ "PINB7", "PINB6", "PINB5", "PINB4", "PINB3", "PINB2", "PINB1", "PINB0" ]  },
-		{ "address" : "0x0024", "name": "DDRB", "bits" : [ "DDRB7", "DDRB6", "DDRB5", "DDRB4", "DDRB3", "DDRB2", "DDRB1", "DDRB0" ]  },
+		{ "address" : "0x0024", "name": "DDRB", "bits" : [ "DDB7", "DDB6", "DDB5", "DDB4", "DDB3", "DDB2", "DDB1", "DDB0" ]  },
 		{ "address" : "0x0025", "name": "PORTB", "bits" : [ "PORTB7", "PORTB6", "PORTB5", "PORTB4", "PORTB3", "PORTB2", "PORTB1", "PORTB0" ]  },
 
 		{ "address" : "0x0026", "name": "PINC", "bits" : [ null, "PINC6", "PINC5", "PINC4", "PINC3", "PINC2", "PINC1", "PINC0" ]  },
-		{ "address" : "0x0027", "name": "DDRC", "bits" : [ null, "DDRC6", "DDRC5", "DDRC4", "DDRC3", "DDRC2", "DDRC1", "DDRC0" ]  },
+		{ "address" : "0x0027", "name": "DDRC", "bits" : [ null, "DDC6", "DDC5", "DDC4", "DDC3", "DDC2", "DDC1", "DDC0" ]  },
 		{ "address" : "0x0028", "name": "PORTC", "bits" : [ null, "PORTC6", "PORTC5", "PORTC4", "PORTC3", "PORTC2", "PORTC1", "PORTC0" ]  },
 
 		{ "address" : "0x0029", "name": "PIND", "bits" : [ "PIND7", "PIND6", "PIND5", "PIND4", "PIND3", "PIND2", "PIND1", "PIND0" ]  },
-		{ "address" : "0x002A", "name": "DDRD", "bits" : [ "DDRD7", "DDRD6", "DDRD5", "DDRD4", "DDRD3", "DDRD2", "DDRD1", "DDRD0" ]  },
+		{ "address" : "0x002A", "name": "DDRD", "bits" : [ "DDD7", "DDD6", "DDD5", "DDD4", "DDD3", "DDD2", "DDD1", "DDD0" ]  },
 		{ "address" : "0x002B", "name": "PORTD", "bits" : [ "PORTD7", "PORTD6", "PORTD5", "PORTD4", "PORTD3", "PORTD2", "PORTD1", "PORTD0" ]  },
 
 		{ "address" : "0x0035", "name": "TIFR0", "bits" : [ null, null, null, null, null, "OCF0B", "OCF0A", "TOV0" ], "mask" : "0b00000111" },
@@ -126,7 +154,7 @@
 		{ "address" : "0x0054", "name": "MCUSR", "bits" : [ null, null, null, null, "WDRF", "BORF", "EXTRF", "PORF" ] },
 		{ "address" : "0x0055", "name": "MCUCR", "bits" : [ null, null, null, "PUD", null, null, "IVSEL", "IVCE" ] },
 
-		{ "address" : "0x0057", "name": "SPMCSR", "bits" : [ "SPMIE", "RWWSB", "SIGRD", "RWWSRE", "LBSET", "PGWRT", "PGERS", "SPMEN" ] },
+		{ "address" : "0x0057", "name": "SPMCSR", "bits" : [ "SPMIE", "RWWSB", "SIGRD", "RWWSRE", "BLBSET", "PGWRT", "PGERS", "SPMEN" ] },
 
 		{ "address" : "0x005D", "name": "SPL" },
 		{ "address" : "0x005E", "name": "SPH", "mask" : "0b000000_111" },
@@ -153,11 +181,11 @@
 
 		{ "address" : "0x0078", "name": "ADCL" },
 		{ "address" : "0x0079", "name": "ADCH" },
-		{ "address" : "0x007A", "name": "ADCSRA", "bits" : [ "ADEN", "ADSC", "ADATE", "ADIF", "ADIE", "ADSP2", "ADSP1", "ADSP0" ] },
+		{ "address" : "0x007A", "name": "ADCSRA", "bits" : [ "ADEN", "ADSC", "ADATE", "ADIF", "ADIE", "ADPS2", "ADPS1", "ADPS0" ] },
 		{ "address" : "0x007B", "name": "ADCSRB", "bits" : [ null, "ACME", null, null, null, "ADTS2", "ADTS1", "ADTS0" ] },
 		{ "address" : "0x007C", "name": "ADMUX", "bits" : [ "REFS1", "REFS0", "ADLAR", null, "MUX3", "MUX2", "MUX1", "MUX0" ] },
-		{ "address" : "0x007E", "name": "DIR0", "bits" : [ null, null, "ADC5D", "ADC4D", "ADC3D", "ADC2D", "ADC1D", "ADC0D" ] },
-		{ "address" : "0x007F", "name": "DIR1", "bits" : [ null, null, null, null, null, null, "AIN1D", "AIN0D" ] },
+		{ "address" : "0x007E", "name": "DIDR0", "bits" : [ null, null, "ADC5D", "ADC4D", "ADC3D", "ADC2D", "ADC1D", "ADC0D" ] },
+		{ "address" : "0x007F", "name": "DIDR1", "bits" : [ null, null, null, null, null, null, "AIN1D", "AIN0D" ] },
 	
 		{ "address" : "0x0080", "name": "TCCR1A", "bits" : [ "COM1A1", "COM1A0", "COM1B1", "COM1B0", null, null, "WGM11", "WGM10" ] },
 		{ "address" : "0x0081", "name": "TCCR1B", "bits" : [ "ICNC1", "ICES1", null, "WGM13", "WGM12", "CS12", "CS11", "CS10" ] },
@@ -184,10 +212,10 @@
 		{ "address" : "0x00BA", "name": "TWAR", "bits" : [ "TWA6", "TWA5", "TWA4", "TWA3", "TWA2", "TWA1", "TWA0", "TWGCE" ] },
 		{ "address" : "0x00BB", "name": "TWDR" },
 		{ "address" : "0x00BC", "name": "TWCR", "bits" : [ "TWINT", "TWEA", "TWSTA", "TWSTO", "TWWC", "TWEN", null, null ] },
-		{ "address" : "0x00BD", "name": "TWAMR", "bits" : [ "TWAM6", "TWAM5", "TWAM4", "TWAM3", "TWAM2", "TWAM1", "TWAM0", null ] },
+		{ "address" : "0x00BD", "name": "TWAMR" },
 
 		{ "address" : "0x00C0", "name": "UCSR0A", "bits" : [ "RXC0", "TXC0", "UDRE0", "FE0", "DOR0", "UPE0", "U2X0", "MPCM0" ] },
-		{ "address" : "0x00C1", "name": "UCSR0B", "bits" : [ "RXCIE0", "TXCIE0", "UDRIE0", "RXEN0", "TXEN0", "UCSZ02", "RXB80", "TX8B0" ] },
+		{ "address" : "0x00C1", "name": "UCSR0B", "bits" : [ "RXCIE0", "TXCIE0", "UDRIE0", "RXEN0", "TXEN0", "UCSZ02", "RXB80", "TXB80" ] },
 		{ "address" : "0x00C2", "name": "UCSR0C", "bits" : [ "UMSEL01", "UMSEL00", "UPM01", "UPM00", "USBS0", "UCSZ01", "UCSZ00", "UCPOL0" ] },
 		{ "address" : "0x00C4", "name": "UBRR0L" },
 		{ "address" : "0x00C5", "name": "UBRR0H" },

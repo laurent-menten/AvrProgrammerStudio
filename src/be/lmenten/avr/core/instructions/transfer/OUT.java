@@ -56,7 +56,7 @@ public class OUT
 	public void execute( Core core )
 	{
 		CoreRegister rr = core.getGeneralRegister( getRx() );
-		CoreRegister io = core.getIORegister( getA() );
+		CoreRegister io = core.getIORegisterByAddress( getA() );
 
 		io.setData( rr.getData() );
 

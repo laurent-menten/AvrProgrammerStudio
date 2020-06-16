@@ -85,7 +85,7 @@ public abstract class AbstractInstruction_Rx_A6
 		String address = String.format( "0x%02X", (getA() & getDataMask() ) );
 		if( core != null )
 		{
-			CoreRegister rdesc = core.getIORegister( getA() );
+			CoreRegister rdesc = core.getIORegisterByAddress( getA() );
 			if( rdesc != null )
 			{
 				parsedLine.setComment( " addr=" + address
