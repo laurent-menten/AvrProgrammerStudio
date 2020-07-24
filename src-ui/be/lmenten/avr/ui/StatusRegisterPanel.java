@@ -3,8 +3,8 @@ package be.lmenten.avr.ui;
 import javax.swing.JPanel;
 
 import be.lmenten.avr.core.CoreRegister;
-import be.lmenten.avr.core.event.AccessEvent;
-import be.lmenten.avr.core.event.AccessEventListener;
+import be.lmenten.avr.core.analysis.AccessEvent;
+import be.lmenten.avr.core.analysis.AccessEventListener;
 
 public class StatusRegisterPanel
 	extends JPanel

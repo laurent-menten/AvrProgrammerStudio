@@ -9,9 +9,9 @@ public class CoreStatusRegister
 	// ===
 	// ========================================================================
 
-	public CoreStatusRegister( CoreRegisterDescriptor rdesc )
+	public CoreStatusRegister( int address, CoreRegisterDescriptor rdesc )
 	{
-		super( rdesc );
+		super( address, rdesc );
 	}
 
 	// ========================================================================

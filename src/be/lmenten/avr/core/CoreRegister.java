@@ -34,14 +34,14 @@ public class CoreRegister
 	// === CONSTRUCTOR(s) =====================================================
 	// ========================================================================
 
-	public CoreRegister( CoreRegisterDescriptor desc )
+	public CoreRegister( int address, CoreRegisterDescriptor desc )
 	{
-		this( (byte) 0, desc );
+		this( address, desc, (byte) 0 );
 	}
 
-	public CoreRegister( byte value, CoreRegisterDescriptor desc )
+	public CoreRegister( int address, CoreRegisterDescriptor desc, byte value )
 	{
-		super( value, desc.getDefaultValue() );
+		super( address, value, desc.getDefaultValue() );
 
 		this.desc = desc;
 	}
@@ -120,6 +120,36 @@ public class CoreRegister
 
 		return bit( bit );
 	}
+
+	public byte bits( String ... names )
+	{
+		if( names == null )
+		{
+			throw new NullPointerException();
+		}
+
+		byte mask = 0b0000_0000;
+		for( String name : names )
+		{
+			if( name == null )
+			{
+				throw new NullPointerException();
+			}
+
+			int bit = getBitByName( name );
+			if( bit < 0 )
+			{
+				throw new IllegalArgumentException( "Bit " + desc.getName() + "." + name + " not found !!!" );
+			}
+
+			mask |= (1 << bit);			
+		}
+
+
+		return bits( mask );
+	}
+
+	// -------------------------------------------------------------------------
 
 	public void bit( String name, boolean state )
 	{

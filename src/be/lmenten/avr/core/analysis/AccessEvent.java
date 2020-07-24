@@ -1,4 +1,4 @@
-package be.lmenten.avr.core.event;
+package be.lmenten.avr.core.analysis;
 
 import be.lmenten.avr.core.CoreMemoryCell;
 

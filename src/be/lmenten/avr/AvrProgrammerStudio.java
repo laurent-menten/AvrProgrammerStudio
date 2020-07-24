@@ -2,14 +2,11 @@ package be.lmenten.avr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.SplashScreen;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.lang.Runtime.Version;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -32,15 +29,14 @@ import be.lmenten.avr.assembler.def.AvrRegisters;
 import be.lmenten.avr.core.Core;
 import be.lmenten.avr.core.CoreRegister;
 import be.lmenten.avr.core.ResetSources;
+import be.lmenten.avr.core.analysis.AccessEvent;
+import be.lmenten.avr.core.analysis.AccessEventListener;
 import be.lmenten.avr.core.descriptor.CoreDescriptor;
 import be.lmenten.avr.core.descriptor.SupportedCore;
-import be.lmenten.avr.core.event.AccessEvent;
-import be.lmenten.avr.core.event.AccessEventListener;
 import be.lmenten.avr.core.event.CoreEvent;
 import be.lmenten.avr.core.event.CoreEventListener;
 import be.lmenten.avr.core.event.CoreEventType;
 import be.lmenten.avr.core.instructions.Instruction;
-import be.lmenten.avr.core.instructions.InstructionSet;
 import be.lmenten.avr.core.ui.ByteDisplayPanel;
 import be.lmenten.avr.ui.CoreUIDefaults;
 import be.lmenten.utils.app.Application;
@@ -63,21 +59,17 @@ public class AvrProgrammerStudio
 	public static final Version VERSION = 
 		Version.parse( "1.0.1-ea+1-20200524" );
 
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
-	private boolean hasSplashScreen;
-	private SplashScreen splashScreen;
-	private Graphics2D splashScreenGr;
-
-	// ========================================================================
-	// === CONSTRUCTOR(s) =====================================================
-	// ========================================================================
+	// =========================================================================
+	// === CONSTRUCTOR(s) ======================================================
+	// =========================================================================
 
 	public AvrProgrammerStudio()
 	{
 		log.info( "AVR Programmer Studio (version " + VERSION + ")" );
 
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
 
 		int runCount = prefs.getInt( "run.count", 0 );
 	
@@ -93,31 +85,18 @@ public class AvrProgrammerStudio
 
 	}
 
-	// ========================================================================
-	// === class: Application =================================================
-	// ========================================================================
+	// =========================================================================
+	// === class: Application ==================================================
+	// =========================================================================
 
 	@Override
 	protected void initialize()
 	{
 		// ----------------------------------------------------------------------
-		// - Splashscreen -------------------------------------------------------
-		// ----------------------------------------------------------------------
-
-		splashScreen = SplashScreen.getSplashScreen();
-		hasSplashScreen = (splashScreen != null);
-		if( ! hasSplashScreen )
-		{
-			log.warning( "Could not create splashscreen" );
-		}
-		else
-		{
-			splashScreenGr = splashScreen.createGraphics();
-		}
-
-		// ----------------------------------------------------------------------
 		// - UI pre-configuration -----------------------------------------------
 		// ----------------------------------------------------------------------
+
+		splashScreenUpdate( "Setting Nimbus Look & Feel" );
 
 		SwingUtils.setNimbusLookAndFeel();
 
@@ -125,14 +104,17 @@ public class AvrProgrammerStudio
 		// - Install UI defaults ------------------------------------------------
 		// ----------------------------------------------------------------------
 
+		splashScreenUpdate( "Setting UI defaults" );
+
 		CoreUIDefaults.installDefaults();
 
 		// ----------------------------------------------------------------------
+		// - Core descriptors ---------------------------------------------------
 		// ----------------------------------------------------------------------
 
 		for( SupportedCore core : SupportedCore.values() )
 		{
-			splashScreenUpdate( core.getId() );;
+			splashScreenUpdate( "Loading core descriptor : " + core.getId() );;
 
 			core.getDescriptor();
 		}
@@ -143,9 +125,9 @@ public class AvrProgrammerStudio
 	{
 	}
 
-	// ========================================================================
-	// === SPLASHSCREEN =======================================================
-	// ========================================================================
+	// =========================================================================
+	// === SPLASHSCREEN ========================================================
+	// =========================================================================
 
 	/**
 	 * <pre>
@@ -155,6 +137,7 @@ public class AvrProgrammerStudio
 	 * text area : 200, 260, 400, 20
 	 * </pre>
 	 */
+	@Override
 	public void splashScreenUpdate( String text )
 	{
 		if( hasSplashScreen )
@@ -228,39 +211,23 @@ public class AvrProgrammerStudio
 		} );
 
 		int returnVal = fc.showOpenDialog( null );
-		if( returnVal != JFileChooser.APPROVE_OPTION )
+		if( returnVal == JFileChooser.APPROVE_OPTION )
 		{
 			try
 			{
-				InstructionSet.selfTest( core );
-
-				PrintStream out = System.out;
-				PrintStream fileOut = new PrintStream( "./self-text.txt" );
-				System.setOut( fileOut );
-			
-				out.println( " >>> Self test finished <<<" );
-			}
-			catch( IOException e )
-			{
-				log.log( Level.SEVERE, "Self-test failed", e );
-			}
-			finally
-			{
-				System.exit( 0 );
-			}
-		}
-		else
-		{
-			try
-			{
-				core.loadFlash(  fc.getSelectedFile() );
 				core.loadFlash( new File( "./bootloader.ATmega2560.03E000.hex" ) );
+				core.loadFlash(  fc.getSelectedFile() );
 			}
 			catch( IOException e )
 			{
 				log.log( Level.SEVERE, "Failed to load program", e );
 				System.exit( 0 );
 			}
+		}
+		else
+		{
+			finish( false );
+			return;
 		}
 
 		// --------------------------------------------------------------------

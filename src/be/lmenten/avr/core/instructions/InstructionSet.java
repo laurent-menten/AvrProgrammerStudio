@@ -50,14 +50,14 @@ public enum InstructionSet
 	//                                                     S      32
 	ADC( ADC.class,					"0001 11rd dddd rrrr", false, false, null ),
 	ADD( ADD.class,					"0000 11rd dddd rrrr", false, false, null ),
-	ADIW( ADIW.class,				"1001 0110 KKdd KKKK", false, false, null ),
+	ADIW( ADIW.class,					"1001 0110 KKdd KKKK", false, false, null ),
 	AND( AND.class,					"0010 00rd dddd rrrr", false, false, null ),
-	ANDI( ANDI.class,				"0111 KKKK dddd KKKK", false, false, null ),
+	ANDI( ANDI.class,					"0111 KKKK dddd KKKK", false, false, null ),
 	ASR( ASR.class,					"1001 010d dddd 0101", false, false, null ),
-	BCLR( BCLR.class,				"1001 0100 1sss 1000", false, false, null ),
-	BLD( BLD.class, 				"1111 100d dddd 0bbb", false, false, null ),
+	BCLR( BCLR.class,					"1001 0100 1sss 1000", false, false, null ),
+	BLD( BLD.class, 					"1111 100d dddd 0bbb", false, false, null ),
 	BRBC( BRBC.class, 				"1111 01kk kkkk ksss", false, false, null ),
-	BRBS( BRBS.class,				"1111 00kk kkkk ksss", false, false, null ),
+	BRBS( BRBS.class,					"1111 00kk kkkk ksss", false, false, null ),
 
 	BRCC( BRCC.class, 				"1111 01kk kkkk k000", false, false, null )		// BRBC 0 (carry)
 	{
@@ -75,7 +75,7 @@ public enum InstructionSet
 			operands.put( OperandType.s, 0b0000_0000_0000_0111 );
 		}
 	},
-	BREAK( BREAK.class, 			"1001 0101 1001 1000", false, false, null ),
+	BREAK( BREAK.class, 				"1001 0101 1001 1000", false, false, null ),
 	BREQ( BREQ.class, 				"1111 00kk kkkk k001", false, false, null )		// BRBS 1 (zero)
 	{
 		@Override
@@ -100,7 +100,7 @@ public enum InstructionSet
 			operands.put( OperandType.s, 0b0000_0000_0000_0111 );
 		}
 	},
-	BRHS( BRHS.class,				"1111 00kk kkkk k101", false, false, null )		// BRBS 5 (half carry)
+	BRHS( BRHS.class,					"1111 00kk kkkk k101", false, false, null )		// BRBS 5 (half carry)
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -116,7 +116,7 @@ public enum InstructionSet
 			operands.put( OperandType.s, 0b0000_0000_0000_0111 );
 		}
 	},
-	BRIE( BRIE.class,				"1111 00kk kkkk k111", false, false, null )		// BRBS 7 (interrupt)
+	BRIE( BRIE.class,					"1111 00kk kkkk k111", false, false, null )		// BRBS 7 (interrupt)
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -124,7 +124,7 @@ public enum InstructionSet
 			operands.put( OperandType.s, 0b0000_0000_0000_0111 );
 		}
 	},
-	BRLO( BRLO.class,				"1111 00kk kkkk k000", false, false, null )		// BRBS 0 (carry)
+	BRLO( BRLO.class,					"1111 00kk kkkk k000", false, false, null )		// BRBS 0 (carry)
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -132,7 +132,7 @@ public enum InstructionSet
 			operands.put( OperandType.s, 0b0000_0000_0000_0111 );
 		}
 	},
-	BRLT( BRLT.class,				"1111 00kk kkkk k100", false, false, null )		// BRBS 4 (sign)
+	BRLT( BRLT.class,					"1111 00kk kkkk k100", false, false, null )		// BRBS 4 (sign)
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -140,7 +140,7 @@ public enum InstructionSet
 			operands.put( OperandType.s, 0b0000_0000_0000_0111 );
 		}
 	},
-	BRMI( BRMI.class,				"1111 00kk kkkk k010", false, false, null )		// BRBS 2 (negative)
+	BRMI( BRMI.class,					"1111 00kk kkkk k010", false, false, null )		// BRBS 2 (negative)
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -148,7 +148,7 @@ public enum InstructionSet
 			operands.put( OperandType.s, 0b0000_0000_0000_0111 );
 		}
 	},
-	BRNE( BRNE.class,				"1111 01kk kkkk k001", false, false, null )		// BRBC 1 (zero)
+	BRNE( BRNE.class,					"1111 01kk kkkk k001", false, false, null )		// BRBC 1 (zero)
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -156,7 +156,7 @@ public enum InstructionSet
 			operands.put( OperandType.s, 0b0000_0000_0000_0111 );
 		}
 	},
-	BRPL( BRPL.class,				"1111 01kk kkkk k010", false, false, null )		// BRBC 2 (negative)
+	BRPL( BRPL.class,					"1111 01kk kkkk k010", false, false, null )		// BRBC 2 (negative)
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -164,7 +164,7 @@ public enum InstructionSet
 			operands.put( OperandType.s, 0b0000_0000_0000_0111 );
 		}
 	},
-	BRSH( BRSH.class,				"1111 01kk kkkk k000", false, false, null )		// BRBC 0 (carry)
+	BRSH( BRSH.class,					"1111 01kk kkkk k000", false, false, null )		// BRBC 0 (carry)
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -172,7 +172,7 @@ public enum InstructionSet
 			operands.put( OperandType.s, 0b0000_0000_0000_0111 );
 		}
 	},
-	BRTC( BRTC.class,				"1111 01kk kkkk k110", false, false, null )		// BRBC 6 (t)
+	BRTC( BRTC.class,					"1111 01kk kkkk k110", false, false, null )		// BRBC 6 (t)
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -180,7 +180,7 @@ public enum InstructionSet
 			operands.put( OperandType.s, 0b0000_0000_0000_0111 );
 		}
 	},
-	BRTS( BRTS.class,				"1111 00kk kkkk k110", false, false, null )		// BRBS 6 (t)
+	BRTS( BRTS.class,					"1111 00kk kkkk k110", false, false, null )		// BRBS 6 (t)
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -188,7 +188,7 @@ public enum InstructionSet
 			operands.put( OperandType.s, 0b0000_0000_0000_0111 );
 		}
 	},
-	BRVC( BRVC.class,				"1111 01kk kkkk k011", false, false, null )		// BRBC 3 (overflow)
+	BRVC( BRVC.class,					"1111 01kk kkkk k011", false, false, null )		// BRBC 3 (overflow)
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -196,7 +196,7 @@ public enum InstructionSet
 			operands.put( OperandType.s, 0b0000_0000_0000_0111 );
 		}
 	},
-	BRVS( BRVS.class,				"1111 00kk kkkk k011", false, false, null )		// BRBS 3 (overflow)
+	BRVS( BRVS.class,					"1111 00kk kkkk k011", false, false, null )		// BRBS 3 (overflow)
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -204,9 +204,9 @@ public enum InstructionSet
 			operands.put( OperandType.s, 0b0000_0000_0000_0111 );
 		}
 	},
-	BSET( BSET.class,				"1001 0100 0sss 1000", false, false, null ),
+	BSET( BSET.class,					"1001 0100 0sss 1000", false, false, null ),
 	BST( BST.class,					"1111 101d dddd 0bbb", false, false, null ),
-	CALL( CALL.class,				"1001 010k kkkk 111k", false, true, null ),
+	CALL( CALL.class,					"1001 010k kkkk 111k", false, true, null ),
 	CBI( CBI.class,					"1001 1000 AAAA Abbb", false, false, null ),
 	CBR( CBR.class,					"0111 KKKK dddd KKKK", false, false, null ),	// ANDI Rd, $FF-K
 	CLC( CLC.class,					"1001 0100 1000 1000", false, false, null ),	// BCLR 0
@@ -219,33 +219,33 @@ public enum InstructionSet
 	CLV( CLV.class,					"1001 0100 1011 1000", false, false, null ),	// BCLR 3
 	CLZ( CLZ.class,					"1001 0100 1001 1000", false, false, null ),	// BCLR 1
 	COM( COM.class,					"1001 010d dddd 0000", false, false, null ),
-	CP( CP.class,					"0001 01rd dddd rrrr", false, false, null ),
+	CP( CP.class,						"0001 01rd dddd rrrr", false, false, null ),
 	CPC( CPC.class,					"0000 01rd dddd rrrr", false, false, null ),
 	CPI( CPI.class,					"0011 KKKK dddd KKKK", false, false, null ),
-	CPSE( CPSE.class,				"0001 00rd dddd rrrr", false, false, null ),
+	CPSE( CPSE.class,					"0001 00rd dddd rrrr", false, false, null ),
 	DEC( DEC.class,					"1001 010d dddd 1010", false, false, null ),
 	DES( DES.class,					"1001 0100 KKKK 1011", false, false, null ),
 	EICALL( EICALL.class,			"1001 0101 0001 1001", false, false, null ),
 	EIJMP( EIJMP.class,				"1001 0100 0001 1001", false, false, null ),
-	ELPM_R0_Z( ELPM_R0.class,			"1001 0101 1101 1000", false, false, "ELPM" ),
+	ELPM_R0_Z( ELPM_R0.class,		"1001 0101 1101 1000", false, false, "ELPM" ),
 	ELPM_Z( ELPM.class,				"1001 000d dddd 0110", false, false, "ELPM" ),
-	ELPM_ZP( ELPM.class,			"1001 000d dddd 0111", false, false, "ELPM" ),
+	ELPM_ZP( ELPM.class,				"1001 000d dddd 0111", false, false, "ELPM" ),
 	EOR( EOR.class,					"0010 01rd dddd rrrr", false, false, null ),
-	FMUL( FMUL.class,				"0000 0011 0ddd 1rrr", false, false, null ),
+	FMUL( FMUL.class,					"0000 0011 0ddd 1rrr", false, false, null ),
 	FMULS( FMULS.class,				"0000 0011 1ddd 0rrr", false, false, null ),
 	FMULSU( FMULSU.class,			"0000 0011 1ddd 1rrr", false, false, null ),
 	ICALL( ICALL.class,				"1001 0101 0000 1001", false, false, null ),
-	IJMP( IJMP.class,				"1001 0100 0000 1001", false, false, null ),
-	IN( IN.class,					"1011 0AAd dddd AAAA", false, false, null ),
+	IJMP( IJMP.class,					"1001 0100 0000 1001", false, false, null ),
+	IN( IN.class,						"1011 0AAd dddd AAAA", false, false, null ),
 	INC( INC.class,					"1001 010d dddd 0011", false, false, null ),
 	JMP( JMP.class,					"1001 010k kkkk 110k", false, true, null ),
 	LAC( LAC.class,					"1001 001r rrrr 0110", false, false, null ),
 	LAS( LAS.class,					"1001 001r rrrr 0101", false, false, null ),
 	LAT( LAT.class,					"1001 001r rrrr 0111", false, false, null ),
 	LD_X( LD.class,					"1001 000d dddd 1100", false, false, "LD" ),
-	LD_XP( LD.class,				"1001 000d dddd 1101", false, false, "LD" ),
-	LD_DX( LD.class,				"1001 000d dddd 1110", false, false, "LD" ),
-	LD_Y( LDD.class,				"1000 000d dddd 1000", false, false, "LD" )		// LDD Rd, Y+0
+	LD_XP( LD.class,					"1001 000d dddd 1101", false, false, "LD" ),
+	LD_DX( LD.class,					"1001 000d dddd 1110", false, false, "LD" ),
+	LD_Y( LDD.class,					"1000 000d dddd 1000", false, false, "LD" )		// LDD Rd, Y+0
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -253,10 +253,10 @@ public enum InstructionSet
 			operands.put( OperandType.q, 0b0010_1100_0000_0111 );
 		}
 	},
-	LD_YP( LD.class,				"1001 000d dddd 1001", false, false, "LD" ),
-	LD_DY( LD.class,				"1001 000d dddd 1010", false, false, "LD" ),
+	LD_YP( LD.class,					"1001 000d dddd 1001", false, false, "LD" ),
+	LD_DY( LD.class,					"1001 000d dddd 1010", false, false, "LD" ),
 	LDD_YQ( LDD.class,				"10q0 qq0d dddd 1qqq", false, false, "LDD" ),
-	LD_Z( LDD.class,				"1000 000d dddd 0000", false, false, "LD" )		// LDD Rd, Z+0
+	LD_Z( LDD.class,					"1000 000d dddd 0000", false, false, "LD" )		// LDD Rd, Z+0
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -264,44 +264,44 @@ public enum InstructionSet
 			operands.put( OperandType.q, 0b0010_1100_0000_0111 );
 		}
 	},
-	LD_ZP( LD.class,				"1001 000d dddd 0001", false, false, "LD" ),
-	LD_DZ( LD.class,				"1001 000d dddd 0010", false, false, "LD" ),
+	LD_ZP( LD.class,					"1001 000d dddd 0001", false, false, "LD" ),
+	LD_DZ( LD.class,					"1001 000d dddd 0010", false, false, "LD" ),
 	LDD_ZQ( LDD.class,				"10q0 qq0d dddd 0qqq", false, false, "LDD" ),
 	LDI( LDI.class,					"1110 KKKK dddd KKKK", false, false, null ),
 	LDS( LDS.class,					"1001 000d dddd 0000", false, true, null ),
-	LDS_16( LDS16.class,			"1010 0kkk dddd kkkk", false, false, "LDS" ),
+	LDS_16( LDS16.class,				"1010 0kkk dddd kkkk", false, false, "LDS" ),
 	LPM_R0_Z( LPM_R0.class,			"1001 0101 1100 1000", false, false, "LPM" ),
-	LPM_Z( LPM.class,				"1001 000d dddd 0100", false, false, "LPM" ),
+	LPM_Z( LPM.class,					"1001 000d dddd 0100", false, false, "LPM" ),
 	LPM_ZP( LPM.class,				"1001 000d dddd 0101", false, false, "LPM" ),
 	LSL( LSL.class,					"0000 11rd dddd rrrr", false, false, null ),
 	LSR( LSR.class,					"1001 010d dddd 0110", false, false, null ),
 	MOV( MOV.class,					"0010 11rd dddd rrrr", false, false, null ),
-	MOVW( MOVW.class,				"0000 0001 dddd rrrr", false, false, null ),
+	MOVW( MOVW.class,					"0000 0001 dddd rrrr", false, false, null ),
 	MUL( MUL.class,					"1001 11rd dddd rrrr", false, false, null ),
-	MULS( MULS.class,				"0000 0010 dddd rrrr", false, false, null ),
+	MULS( MULS.class,					"0000 0010 dddd rrrr", false, false, null ),
 	MULSU( MULSU.class,				"0000 0011 0ddd 0rrr", false, false, null ),
 	NEG( NEG.class,					"1001 010d dddd 0001", false, false, null ),
 	NOP( NOP.class,					"0000 0000 0000 0000", false, false, null ),
-	OR( OR.class,					"0010 10rd dddd rrrr", false, false, null ),
+	OR( OR.class,						"0010 10rd dddd rrrr", false, false, null ),
 	ORI( ORI.class,					"0110 KKKK dddd KKKK", false, false, null ),
 	OUT( OUT.class,					"1011 1AAr rrrr AAAA", true, false, null ),
 	POP( POP.class,					"1001 000d dddd 1111", false, false, null ),
-	PUSH( PUSH.class,				"1001 001d dddd 1111", false, false, null ),
+	PUSH( PUSH.class,					"1001 001d dddd 1111", false, false, null ),
 	RCALL( RCALL.class,				"1101 kkkk kkkk kkkk", false, false, null ),
 	RET( RET.class,					"1001 0101 0000 1000", false, false, null ),
-	RETI( RETI.class,				"1001 0101 0001 1000", false, false, null ),
-	RJMP( RJMP.class,				"1100 kkkk kkkk kkkk", false, false, null ),
+	RETI( RETI.class,					"1001 0101 0001 1000", false, false, null ),
+	RJMP( RJMP.class,					"1100 kkkk kkkk kkkk", false, false, null ),
 	ROL( ROL.class,					"0001 11rd dddd rrrr", false, false, null ),	// ADC Rd, Rd
 	ROR( ROR.class,					"1001 010d dddd 0111", false, false, null ),
 	SBC( SBC.class,					"0000 10rd dddd rrrr", false, false, null ),
-	SBCI( SBCI.class,				"0100 KKKK dddd KKKK", false, false, null ),
+	SBCI( SBCI.class,					"0100 KKKK dddd KKKK", false, false, null ),
 	SBI( SBI.class,					"1001 1001 AAAA Abbb", false, false, null ),
-	SBIC( SBIC.class,				"1001 1001 AAAA Abbb", false, false, null ),
-	SBIS( SBIS.class,				"1001 1011 AAAA Abbb", false, false, null ),
-	SBIW( SBIW.class,				"1001 0111 KKdd KKKK", false, false, null ),
+	SBIC( SBIC.class,					"1001 1001 AAAA Abbb", false, false, null ),
+	SBIS( SBIS.class,					"1001 1011 AAAA Abbb", false, false, null ),
+	SBIW( SBIW.class,					"1001 0111 KKdd KKKK", false, false, null ),
 	SBR( SBR.class,					"0110 KKKK dddd KKKK", false, false, null ),	// ORI Rd K
-	SBRC( SBRC.class,				"1111 110r rrrr 0bbb", false, false, null ),
-	SBRS( SBRS.class,				"1111 111r rrrr 0bbb", false, false, null ),
+	SBRC( SBRC.class,					"1111 110r rrrr 0bbb", false, false, null ),
+	SBRS( SBRS.class,					"1111 111r rrrr 0bbb", false, false, null ),
 	SEC( SEC.class,					"1001 0100 0000 1000", false, false, null ),	// BSET 0
 	SEH( SEH.class,					"1001 0100 0101 1000", false, false, null ),	// BSET 5
 	SEI( SEI.class,					"1001 0100 0111 1000", false, false, null ),	// BSET 7
@@ -311,7 +311,7 @@ public enum InstructionSet
 		@Override
 		protected void postProcessOpcode()
 		{
-			operands.put( OperandType.K, 0b0000_1111_0000_0000 );
+			operands.put( OperandType.K, 0b0000_1111_0000_1111 );
 		}
 	},
 	SES( SES.class,					"1001 0100 0100 1000", false, false, null ),	// BSET 4
@@ -322,9 +322,9 @@ public enum InstructionSet
 	SPM( SPM.class,					"1001 0101 1110 1000", true, false, null ),
 	SPM_ZP( SPM.class,				"1001 0101 1111 1000", true, false, "SPM" ),
 	ST_X( ST.class,					"1001 001r rrrr 1100", true, false, "ST" ),
-	ST_XP( ST.class,				"1001 001r rrrr 1101", true, false, "ST" ),
-	ST_DX( ST.class,				"1001 001r rrrr 1110", true, false, "ST" ),
-	ST_Y( STD.class,				"1000 001r rrrr 1000", true, false, "ST" )		// STD Rd, Y+0
+	ST_XP( ST.class,					"1001 001r rrrr 1101", true, false, "ST" ),
+	ST_DX( ST.class,					"1001 001r rrrr 1110", true, false, "ST" ),
+	ST_Y( STD.class,					"1000 001r rrrr 1000", true, false, "ST" )		// STD Rd, Y+0
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -332,10 +332,10 @@ public enum InstructionSet
 			operands.put( OperandType.q, 0b0010_1100_0000_0111 );
 		}
 	},
-	ST_YP( ST.class,				"1001 001r rrrr 1001", true, false, "ST" ),
-	ST_DY( ST.class,				"1001 001r rrrr 1010", true, false, "ST" ),
+	ST_YP( ST.class,					"1001 001r rrrr 1001", true, false, "ST" ),
+	ST_DY( ST.class,					"1001 001r rrrr 1010", true, false, "ST" ),
 	STD_YQ( STD.class,				"10q0 qq1r rrrr 1qqq", true, false, "STD" ),
-	ST_Z( STD.class,				"1000 001r rrrr 0000", true, false, "ST" )		// STD Rd, Z+0
+	ST_Z( STD.class,					"1000 001r rrrr 0000", true, false, "ST" )		// STD Rd, Z+0
 	{
 		@Override
 		protected void postProcessOpcode()
@@ -343,14 +343,14 @@ public enum InstructionSet
 			operands.put( OperandType.q, 0b0010_1100_0000_0111 );
 		}
 	},
-	ST_ZP( ST.class,				"1001 001r rrrr 0001", true, false, "ST" ),
-	ST_DZ( ST.class,				"1001 001r rrrr 0010", true, false, "ST" ),
+	ST_ZP( ST.class,					"1001 001r rrrr 0001", true, false, "ST" ),
+	ST_DZ( ST.class,					"1001 001r rrrr 0010", true, false, "ST" ),
 	STD_ZQ( STD.class,				"10q0 qq1r rrrr 0qqq", true, false, "STD" ),
 	STS( STS.class,					"1001 001r rrrr 0000", true, true, null ),
-	STS_16( STS16.class,			"1010 1kkk rrrr kkkk", true, false, "STS" ),
+	STS_16( STS16.class,				"1010 1kkk rrrr kkkk", true, false, "STS" ),
 	SUB( SUB.class,					"0001 10rd dddd rrrr", false, false, null ),
-	SUBI( SUBI.class,				"0101 KKKK dddd KKKK", false, false, null ),
-	SWAP( SWAP.class,				"1001 010d dddd 0010", false, false, null ),
+	SUBI( SUBI.class,					"0101 KKKK dddd KKKK", false, false, null ),
+	SWAP( SWAP.class,					"1001 010d dddd 0010", false, false, null ),
 	TST( TST.class,					"0010 00rd dddd rrrr", false, false, null ),	// AND Rd, Rd
 	WDR( WDR.class,					"1001 0101 1010 1000", false, false, null ),
 	XCH( XCH.class,					"1001 001d dddd 0100", false, false, null ),
@@ -363,21 +363,24 @@ public enum InstructionSet
 			// Make sure DATA is not processed as an AVR opcode
 		}
 	}
+
 	;
+
+	// -------------------------------------------------------------------------
 
 	private static final EnumSet<InstructionSet> disabled =
 		EnumSet.of( LDS_16, STS_16 );
 
-	// ========================================================================
-	// === Data ===============================================================
-	// ========================================================================
+	// =========================================================================
+	// === Data ================================================================
+	// =========================================================================
 
 	protected static ResourceBundle res;
 
 	protected static List<InstructionSet> decoderList;
 	protected static Comparator<InstructionSet> instructionsComparator;
 
-	// ------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 	protected final Class<? extends Instruction> clazz;
 	protected final String opcode;
@@ -395,9 +398,9 @@ public enum InstructionSet
 	protected final Map<OperandType,Integer> operands
 		= new HashMap<>();
 
-	// ========================================================================
-	// === CONSTRUCTOR(s) =====================================================
-	// ========================================================================
+	// =========================================================================
+	// === CONSTRUCTOR(s) ======================================================
+	// =========================================================================
 
 	private InstructionSet( Class<? extends Instruction> clazz,
 			String opcode, boolean isWrite, boolean is32bits, String mnemonic )
@@ -408,15 +411,15 @@ public enum InstructionSet
 		this.is32bits = is32bits;
 		this.mnemonic = mnemonic;
 
-		// --------------------------------------------------------------------
-		// - Get description from "InstructionSet.properties" file ------------
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
+		// - Get description from "InstructionSet.properties" file --------------
+		// ----------------------------------------------------------------------
 
 		this.shortDescription = lookupDescription();
 
-		// --------------------------------------------------------------------
-		// - Look for Instruction( InstructionSet entry, int opcode ) --------- 
-		// --------------------------------------------------------------------
+		// ----------------------------------------------------------------------
+		// - Look for Instruction( InstructionSet entry, int opcode ) -----------
+		// ----------------------------------------------------------------------
 
 		Constructor<? extends Instruction> constructor = null;
 		try

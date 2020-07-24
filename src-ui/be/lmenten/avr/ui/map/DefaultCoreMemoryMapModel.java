@@ -89,19 +89,19 @@ public class DefaultCoreMemoryMapModel
 
 			case FLASH:
 			{
-				CoreMemoryRange range;
+				CoreMemoryRange range = null;
 
 				if( core.supportsBootLoaderSection() )
 				{
 					remove( getElementAt( 0 ) );
-
+/*
 					range = new CoreMemoryRange( memory, "application",
 							core.getApplicationSectionBase() / 2,
 							core.getApplicationSectionSize() / 2 );
 
 					range = new CoreMemoryRange( memory, "bls",
 							core.getBootLoaderSectionBase() / 2,
-							core.getBootLoaderSectionSize() / 2 );
+							core.getBootLoaderSectionSize() / 2 );*/
 					add( range );
 				}
 
@@ -117,11 +117,11 @@ public class DefaultCoreMemoryMapModel
 				if( core.supportsExternalMemoryFeature() && (core.getExternalSramSize() > 0) )
 				{
 					CoreDescriptor coreDescriptor = core.getDescriptor();
-					CoreMemoryRange range;
-
+					CoreMemoryRange range = null;
+/* 
 					range = new CoreMemoryRange( memory, "ext.sram",
 							coreDescriptor.getExternalSramBase(),
-							core.getExternalSramSize() );
+							core.getExternalSramSize() );*/
 					add( range );
 
 					break;

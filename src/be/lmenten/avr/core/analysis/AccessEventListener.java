@@ -1,4 +1,4 @@
-package be.lmenten.avr.core.event;
+package be.lmenten.avr.core.analysis;
 
 public interface AccessEventListener
 {

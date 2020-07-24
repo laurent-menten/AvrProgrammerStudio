@@ -28,27 +28,25 @@ import be.lmenten.avr.assembler.ParsedAssemblerLine;
 public class CoreData
 	extends CoreMemoryCell
 {
-	private byte defaultValue;
-
 	// ========================================================================
 	// === CONSTRUCTOR(s) =====================================================
 	// ========================================================================
 
-	public CoreData()
+	public CoreData( int address )
 	{
-		this( (byte) 0, (byte) 0 ); 
+		this( address, (byte) 0, (byte) 0 ); 
 	}
 
-	public CoreData( byte value )
+	public CoreData( int address, byte value )
 	{
-		this( value, (byte) 0 );
+		this( address, value, (byte) 0 );
 	}
 
-	public CoreData( byte value, byte defaultValue )
+	public CoreData( int address, byte value, byte defaultValue )
 	{
-		setData( value );
+		super( address, defaultValue );
 
-		this.defaultValue = defaultValue;
+		internSetData( value );
 	}
 
 	// ------------------------------------------------------------------------
@@ -59,20 +57,6 @@ public class CoreData
 		return 8;
 	}
 
-	// ========================================================================
-	// === ACCESSOR(s) ========================================================
-	// ========================================================================
-
-
-	/**
-	 * Get the default value of this data cell.
-	 * 
-	 * @return
-	 */
-	public byte getDefaultValue()
-	{
-		return defaultValue;
-	}
 
 	// ========================================================================
 	// === ACTION(s) ==========================================================
@@ -81,9 +65,12 @@ public class CoreData
 	/**
 	 * Reset this data cell to its default value.
 	 */
+	@Override
 	public void reset()
 	{
-		privSetData( getDefaultValue() );
+		super.reset();
+
+		
 	}
 
 	// ------------------------------------------------------------------------
@@ -101,6 +88,37 @@ public class CoreData
 	public byte mask( byte mask )
 	{
 		return (byte) (internGetData() & mask);
+	}
+
+	/**
+	 * several locations in the opcode, the value is packed and can be directly
+	 * used.
+	 * 
+	 * @param mask
+	 * @return
+	 */
+	public byte bits( byte mask )
+	{
+		byte rc = 0;
+
+		for( int from=0, to=0 ; from < 8 ; from++ )
+		{
+			if( (mask & (1 << from)) == (1 << from) )
+			{
+				if( (internGetData() & (1 << from)) == (1 << from) )
+				{
+					rc |= (1 << to);
+				}
+				else
+				{
+					rc &= ~(1 << to);
+				}
+
+				to++;
+			}
+		}
+
+		return rc;
 	}
 
 	// ========================================================================
@@ -141,8 +159,8 @@ public class CoreData
 		 .append( bit2() ? '1' : '0' )
 		 .append( bit1() ? '1' : '0' )
 		 .append( bit0() ? '1' : '0' )
-		 .append( ") [default=0x" )
-		 .append( String.format( "%02X", defaultValue ) )
+		 .append( ") [initial=0x" )
+		 .append( String.format( "%02X", getInitialData() ) )
 		 .append( "]" )
 		 ;
 

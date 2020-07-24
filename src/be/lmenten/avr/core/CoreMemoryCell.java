@@ -20,14 +20,18 @@ package be.lmenten.avr.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 import be.lmenten.avr.assembler.ParsedAssemblerLine;
-import be.lmenten.avr.core.event.AccessEvent;
-import be.lmenten.avr.core.event.AccessEventListener;
+import be.lmenten.avr.core.analysis.Access;
+import be.lmenten.avr.core.analysis.AccessEvent;
+import be.lmenten.avr.core.analysis.AccessEventListener;
+import be.lmenten.avr.core.analysis.AccessType;
+import be.lmenten.avr.core.instructions.Instruction;
 
 /**
  * <p>
- * The root of any data held in one of the memories of an Avr MCU.
+ * The root of any data (or instruction) held in one of the memories of an Avr MCU.
  * 
  * <p>
  * Features:
@@ -43,38 +47,27 @@ import be.lmenten.avr.core.event.AccessEventListener;
  */
 public abstract class CoreMemoryCell
 {
-	private boolean hasAddress = false;
-	private int address = -1;
+	private boolean hasAddress;
+	private int address;
 
+	private boolean hasInitialData;
+	private final int initialData;
 	private boolean hasData = false;
 	private int data = 0;
-	private boolean dirty = false;
-	private long accessCount = 0;
-	
-	// ------------------------------------------------------------------------
 
-	private final List<AccessEventListener> accessListeners
+	private boolean dirty = false;
+
+	// -------------------------------------------------------------------------
+
+	private final List<Access> accessList
+		= new ArrayList<>();
+	
+	private final List<AccessEventListener> accessEventListeners
 		= new ArrayList<>();
 
-	// ========================================================================
-	// === CONSTRUCTOR(s) =====================================================
-	// ========================================================================
-
-	/**
-	 * 
-	 */
-	public CoreMemoryCell()
-	{
-	}
-
-	/**
-	 * 
-	 * @param address
-	 */
-	public CoreMemoryCell( int address )
-	{
-		setAddress( address );
-	}
+	// =========================================================================
+	// === CONSTRUCTOR(s) ======================================================
+	// =========================================================================
 
 	/**
 	 * 
@@ -83,12 +76,44 @@ public abstract class CoreMemoryCell
 	 */
 	public CoreMemoryCell( int address, int data )
 	{
-		setAddress( address );
+		this.hasAddress = true;
+		this.address = address;
 
-		privSetData( data );
+		this.hasInitialData = true;
+		this.initialData = data;
+		this.hasData = true;
+		this.data = data;
 	}
 
-	// ------------------------------------------------------------------------
+	/**
+	 * 
+	 * @param address
+	 */
+	public CoreMemoryCell( int address )
+	{
+		this.hasAddress = true;
+		this.address = address;
+
+		this.hasInitialData = false;
+		this.initialData = 0;
+		this.hasData = false;
+		this.data = 0;
+	}
+
+	public CoreMemoryCell()
+	{
+		this.hasAddress = false;
+		this.address = 0;
+
+		this.hasInitialData = false;
+		this.initialData = 0;
+		this.hasData = false;
+		this.data = 0;
+	}
+
+	// =========================================================================
+	// === INTERNALS ===========================================================
+	// =========================================================================
 
 	/**
 	 * <p>
@@ -101,8 +126,11 @@ public abstract class CoreMemoryCell
 	public void reset()
 	{
 		dirty = false;
-		accessCount = 0l;
+
+		accessList.clear();
 	}
+
+	// -------------------------------------------------------------------------
 
 	/**
 	 * Get the size in bits of this memory cell.
@@ -111,14 +139,81 @@ public abstract class CoreMemoryCell
 	 */
 	public abstract int getDataWidth();
 
+	/**
+	 * 
+	 * @return
+	 */
 	public final int getDataMask()
 	{
 		return ((1 << getDataWidth()) - 1);
 	}
 
-	// ========================================================================
-	// === EVENTS =============================================================
-	// ========================================================================
+	// -------------------------------------------------------------------------
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean hasInitialData()
+	{
+		return hasInitialData;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public int getInitialData()
+	{
+		return initialData;
+	}
+
+	// =========================================================================
+	// === ACCESSES ============================================================
+	// =========================================================================
+
+	/**
+	 * 
+	 * @param tick
+	 * @param instruction
+	 * @param accessType
+	 */
+	public void addAccess( long tick, Instruction instruction, AccessType accessType )
+	{
+		accessList.add( new Access( tick, instruction, accessType ) );
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public ListIterator<Access> getAccessesIterator()
+	{
+		return accessList.listIterator();
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public int getAccessesCount()
+	{
+		return accessList.size();
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean wasAccessed()
+	{
+		return getAccessesCount() != 0;
+	}
+
+
+	// =========================================================================
+	// === EVENTS ==============================================================
+	// =========================================================================
 
 	/**
 	 * 
@@ -126,9 +221,9 @@ public abstract class CoreMemoryCell
 	 */
 	public void addAccessListener( AccessEventListener listener )
 	{
-		if( ! accessListeners.contains( listener ) )
+		if( ! accessEventListeners.contains( listener ) )
 		{
-			accessListeners.add( listener );
+			accessEventListeners.add( listener );
 		}
 	}
 
@@ -138,9 +233,9 @@ public abstract class CoreMemoryCell
 	 */
 	public void removeAccessListener( AccessEventListener listener )
 	{
-		if( accessListeners.contains( listener ) )
+		if( accessEventListeners.contains( listener ) )
 		{
-			accessListeners.remove( listener );
+			accessEventListeners.remove( listener );
 		}
 	}
 
@@ -150,7 +245,7 @@ public abstract class CoreMemoryCell
 	 */
 	protected void fireAccessEvent( AccessEvent event )
 	{
-		for( AccessEventListener listener : accessListeners )
+		for( AccessEventListener listener : accessEventListeners )
 		{
 			listener.onAccessEvent( event );
 		}
@@ -160,22 +255,23 @@ public abstract class CoreMemoryCell
 	// === GETTER(s) / SETTER(s) = ADDRESS ====================================
 	// ========================================================================
 
-	/*
-	 * 
-	 */
-	public boolean hasAddress()
-	{
-		return hasAddress;
-	}
-
 	/**
 	 * 
 	 * @param address
 	 */
 	public void setAddress( int address )
 	{
-		this.address = address;
 		this.hasAddress = true;
+		this.address = address;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean hasAddress()
+	{
+		return hasAddress;
 	}
 
 	/**
@@ -215,37 +311,9 @@ public abstract class CoreMemoryCell
 	 * 
 	 * @param dirty
 	 */
-	public void dirty( boolean dirty )
+	public void setDirty( boolean dirty )
 	{
 		this.dirty = dirty;
-	}
-
-	// ------------------------------------------------------------------------
-
-	/**
-	 * 
-	 * @return
-	 */
-	public boolean wasAccessed()
-	{
-		return accessCount == 0l;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public long getAccessCount()
-	{
-		return accessCount;
-	}
-
-	/**
-	 * 
-	 */
-	public void accessed()
-	{
-		accessCount++;
 	}
 
 	// ------------------------------------------------------------------------
@@ -294,7 +362,6 @@ public abstract class CoreMemoryCell
 		this.data = data;
 		this.hasData = true;
 		this.dirty = true;
-		accessed();
 	}
 
 	/**
@@ -309,7 +376,6 @@ public abstract class CoreMemoryCell
 	 */
 	public int privGetData()
 	{
-		accessed();
 		return data;
 	}
 
@@ -425,14 +491,7 @@ public abstract class CoreMemoryCell
 	{
 		StringBuilder s = new StringBuilder();
 
-		if( hasAddress )
-		{
-			s.append( String.format( "0x%05X:", address ) );
-		}
-		else
-		{
-			s.append( "?????:" );
-		}
+		s.append( String.format( "0x%05X:", address ) );
 
 		return s.toString();
 	}

@@ -1,0 +1,16 @@
+1.1: 16/06/2020 22:49:50.526 [be.lmenten.avr.AvrProgrammerStudio.<init>] - [INFO] - AVR Programmer Studio (version 1.0.1-ea+1-20200524)
+1.2: 16/06/2020 22:49:50.532 [be.lmenten.utils.app.Application.launch] - [INFO] - Initializing application ...
+1.227: 16/06/2020 22:49:51.662 [be.lmenten.utils.app.Application.launch] - [INFO] - Starting application ...
+18.228: 16/06/2020 22:49:51.709 [be.lmenten.avr.core.Core.<init>] - [INFO] - Core: ATmega2560
+18.229: 16/06/2020 22:49:51.711 [be.lmenten.avr.core.Core.<init>] - [FINE] -  > features : EXTERNAL_SRAM, BOOT_LOADER
+18.230: 16/06/2020 22:49:51.711 [be.lmenten.avr.core.Core.<init>] - [FINE] -  > fuse bytes : 3
+18.231: 16/06/2020 22:49:51.714 [be.lmenten.avr.core.Core.<init>] - [FINE] -  > lockbits bytes : 1
+18.232: 16/06/2020 22:49:51.716 [be.lmenten.avr.core.Core.<init>] - [INFO] - Flash size = 262144 bytes
+18.233: 16/06/2020 22:49:51.723 [be.lmenten.avr.core.Core.<init>] - [FINE] -  > BLS address = 0x01F000
+18.234: 16/06/2020 22:49:51.724 [be.lmenten.avr.core.Core.<init>] - [FINE] -  > BLS size = 4096 bytes
+18.235: 16/06/2020 22:49:51.724 [be.lmenten.avr.core.Core.<init>] - [INFO] - Sram size = 8704 + 16384 bytes
+18.236: 16/06/2020 22:49:51.726 [be.lmenten.avr.core.Core.<init>] - [FINE] -  > 32 general registers
+18.237: 16/06/2020 22:49:51.728 [be.lmenten.avr.core.Core.<init>] - [FINE] -  > 64 I/O registers
+18.238: 16/06/2020 22:49:51.729 [be.lmenten.avr.core.Core.<init>] - [FINE] -  > 416 extended I/O registers
+18.239: 16/06/2020 22:49:51.769 [be.lmenten.avr.core.Core.<init>] - [INFO] - Eeprom size = 4096 bytes
+1.1087: 16/06/2020 22:49:56.482 [be.lmenten.utils.app.Application.launch] - [INFO] - Application finished.

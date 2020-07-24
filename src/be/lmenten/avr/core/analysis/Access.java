@@ -16,23 +16,50 @@
 // = = <https://www.gnu.org/licenses/>.                                     = =
 // = ======================================================================== =
 
-package be.lmenten.avr;
+package be.lmenten.avr.core.analysis;
 
-import be.lmenten.utils.app.Application;
+import be.lmenten.avr.core.instructions.Instruction;
 
 /**
+ * 
+ *
  * @author Laurent Menten
- * @version 1.0, (5 Jun 2020)
+ * @version 1.0, (12 Jul 2020)
  * @since 1.0
  */
-public class Main
+public class Access
 {
-	// ========================================================================
-	// === Application EntryPoint =============================================
-	// ========================================================================
+	private final long tick;
+	private final Instruction instruction;
+	private final AccessType accessType;
 
-	public static void main( String[] args )
+	// =========================================================================
+	// ===
+	// =========================================================================
+
+	public Access( long tick, Instruction instruction, AccessType accessType )
 	{
-		Application.launch( AvrProgrammerStudio.class, args );
+		this.tick = tick;
+		this.instruction = instruction;
+		this.accessType = accessType;
+	}
+
+	// =========================================================================
+	// ===
+	// =========================================================================
+
+	public long getTick()
+	{
+		return tick;
+	}
+
+	public Instruction getInstruction()
+	{
+		return instruction;
+	}
+
+	public AccessType getAccessType()
+	{
+		return accessType;
 	}
 }

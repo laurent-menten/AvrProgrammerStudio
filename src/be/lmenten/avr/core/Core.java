@@ -198,8 +198,7 @@ public class Core
 		fuses = new CoreRegister [ cdesc.getFusesCount() ];
 		cdesc.exportFuses( (addr, rdesc) -> 
 		{
-			fuses[ addr ] = new CoreRegister( rdesc );
-			fuses[ addr ].setAddress( addr );
+			fuses[ addr ] = new CoreRegister( addr, rdesc );
 		} );
 
 		// ----------------------------------------------------------------------
@@ -209,8 +208,7 @@ public class Core
 		lockBits = new CoreRegister [ cdesc.getLockBitsCount() ];
 		cdesc.exportLockBits( (addr, rdesc) ->
 		{
-			lockBits[ addr ] = new CoreRegister( rdesc );
-			lockBits[ addr ].setAddress( addr );
+			lockBits[ addr ] = new CoreRegister( addr, rdesc );
 		} );
 		
 		// ----------------------------------------------------------------------
@@ -261,7 +259,7 @@ public class Core
 
 		cdesc.exportRegisters( ( addr, rdesc ) ->
 		{
-			CoreRegister reg = new CoreRegister( rdesc ); 
+			CoreRegister reg = new CoreRegister( addr, rdesc ); 
 			reg.setAddress( addr );
 
 			sram[ addr ] = reg;			
@@ -276,9 +274,9 @@ public class Core
 			CoreRegister reg;
 	
 			if( rdesc.getName().equals( "SREG" ) )
-				reg = new CoreStatusRegister( rdesc );
+				reg = new CoreStatusRegister( addr, rdesc );
 			else
-				reg = new CoreRegister( rdesc ); 
+				reg = new CoreRegister( addr, rdesc ); 
 
 			reg.setAddress( addr );
 
@@ -291,7 +289,7 @@ public class Core
 
 		cdesc.exportExtendedIoRegisters( ( addr, rdesc ) ->
 		{
-			CoreRegister reg = new CoreRegister( rdesc ); 
+			CoreRegister reg = new CoreRegister( addr, rdesc ); 
 			reg.setAddress( addr );
 
 			sram[ addr ] = reg;
@@ -303,10 +301,9 @@ public class Core
 
 		for( int addr = 0 ; addr < cdesc.getSramSize() ; addr++ )
 		{
-			CoreData data = new CoreData(); 
-			data.setAddress( cdesc.getSramBase() + addr );
-
-			sram[ cdesc.getSramBase() + addr ] = data;
+			int address = cdesc.getSramBase() + addr;
+			CoreData data = new CoreData( address ); 
+			sram[ address ] = data;
 		}
 
 		// - External (off-chip) memory -----------------------------------------
@@ -315,10 +312,9 @@ public class Core
 		{
 			for( int addr = 0 ; addr < externalSramSize ; addr++ )
 			{
-				CoreData data = new CoreData(); 
-				data.setAddress( cdesc.getExternalSramBase() + addr );
-
-				sram[ cdesc.getExternalSramBase() + addr ] = data;
+				int address = cdesc.getExternalSramBase() + addr;
+				CoreData data = new CoreData( address ); 
+				sram[ address ] = data;
 			}
 		}
 
@@ -331,10 +327,9 @@ public class Core
 		eeprom = new CoreData [ cdesc.getEepromSize() ];
 		for( int addr = 0 ; addr < eeprom.length ; addr++ )
 		{
-			CoreData data = new CoreData(); 
-			data.setAddress( cdesc.getExternalSramBase() + addr );
-
-			eeprom[ addr ] = data;
+			int address = addr;
+			CoreData data = new CoreData( address ); 
+			eeprom[ address ] = data;
 		}
 
 		// ----------------------------------------------------------------------
@@ -609,7 +604,11 @@ public class Core
 	{
 		if( supportsBootLoaderSection() )
 		{
-			return cdesc.getFlashSize() - getBootLoaderSectionSize();
+			CoreRegister fuse = getFuseByte( "HIGH_BYTE" ) ;
+
+			int bootsz = fuse.bits( "BOOTSZ1", "BOOTSZ0" );
+
+			return cdesc.getBootLoaderSection( bootsz ).getRangeBase();
 		}
 
 		throw new UnsupportedOperationException( "MCU has no bootloader support" );
@@ -626,7 +625,7 @@ public class Core
 		{
 			CoreRegister fuse = getFuseByte( "HIGH_BYTE" ) ;
 
-			int bootsz = fuse.mask( "BOOTSZ1", "BOOTSZ0" ) >> 1;
+			int bootsz = fuse.bits( "BOOTSZ1", "BOOTSZ0" );
 
 			return cdesc.getBootLoaderSection( bootsz ).getRangeSize();
 		}
@@ -977,9 +976,7 @@ public class Core
 
 			else // BOOTRST programmed
 			{
-				int address = getBootLoaderSectionBase();
-
-				programCounter = address / 2;
+				programCounter = getBootLoaderSectionBase();
 			}
 		}
 		else
@@ -1186,7 +1183,7 @@ public class Core
 		
 		if( sram[address] == null )
 		{
-			sram[address] = new CoreData();
+			sram[address] = new CoreData( address );
 		}
 
 		return sram[address];
@@ -1234,7 +1231,7 @@ public class Core
 
 		if( eeprom[address] == null )
 		{
-			eeprom[address] = new CoreData();
+			eeprom[address] = new CoreData( address );
 		}
 
 		return eeprom[address];

@@ -86,7 +86,7 @@ public class CoreMemoryRange
 		}
 	}
 
-	public CoreMemoryRange( CoreMemory memory, String name, int base, int size )
+	/*package*/ CoreMemoryRange( CoreMemory memory, String name, int base, int size )
 	{
 		this.memory = memory;
 		this.name = name;

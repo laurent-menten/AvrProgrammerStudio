@@ -16,23 +16,19 @@
 // = = <https://www.gnu.org/licenses/>.                                     = =
 // = ======================================================================== =
 
-package be.lmenten.avr;
-
-import be.lmenten.utils.app.Application;
+package be.lmenten.avr.core.analysis;
 
 /**
+ * 
+ *
  * @author Laurent Menten
- * @version 1.0, (5 Jun 2020)
+ * @version 1.0, (12 Jul 2020)
  * @since 1.0
  */
-public class Main
+public enum AccessType
 {
-	// ========================================================================
-	// === Application EntryPoint =============================================
-	// ========================================================================
-
-	public static void main( String[] args )
-	{
-		Application.launch( AvrProgrammerStudio.class, args );
-	}
+	READ,
+	WRITE,
+	EXECUTE,
+	;
 }
